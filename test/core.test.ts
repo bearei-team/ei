@@ -1,7 +1,7 @@
 import fetch from 'jest-fetch-mock';
 import ei from '../src/core';
 
-describe('EI Request', () => {
+describe('core', () => {
   beforeAll(() => {
     fetch.enableMocks();
   });
