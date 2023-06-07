@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import * as option from '.';
-=======
-import { option } from '.';
->>>>>>> main
 
 describe('option', () => {
   beforeEach(() => {

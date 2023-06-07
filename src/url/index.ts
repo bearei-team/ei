@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import * as globalOption from '../option';
-=======
-import { option as globalOption } from '../option';
->>>>>>> main
 import type { URLOption } from './url';
 
 const processFullURL = (url: string) => {
