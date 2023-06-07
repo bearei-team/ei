@@ -1,4 +1,4 @@
-import { option } from '.';
+import * as option from '.';
 
 describe('option', () => {
   beforeEach(() => {

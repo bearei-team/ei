@@ -1,4 +1,4 @@
-import { option as globalOption } from '../option';
+import * as globalOption from '../option';
 import type { URLOption } from './url';
 
 const processFullURL = (url: string) => {

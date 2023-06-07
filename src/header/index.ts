@@ -1,4 +1,4 @@
-import { option as globalOption } from '../option';
+import * as globalOption from '../option';
 import type { Header, Headers } from './header';
 
 const createHeaderObject = <T extends Headers>(headers: T) =>
@@ -16,6 +16,7 @@ const mergeHeader = (defaultHeader: Header, customHeader: Header) => ({
 
 const removeContentType = (header: Header) => {
   if (header['content-type']?.startsWith('multipart/form-data')) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { 'content-type': _, ...rest } = header;
 
     return rest;

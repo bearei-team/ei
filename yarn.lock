@@ -1307,9 +1307,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bearei/fetch@workspace:.":
+"@bearei/ei@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@bearei/fetch@workspace:."
+  resolution: "@bearei/ei@workspace:."
   dependencies:
     "@babel/core": ^7.20.2
     "@babel/preset-env": ^7.20.2
