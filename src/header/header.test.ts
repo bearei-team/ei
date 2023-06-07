@@ -1,5 +1,9 @@
 import processHeader from '.';
+<<<<<<< HEAD
 import * as option from '../option';
+=======
+import { option } from '../option';
+>>>>>>> main
 
 describe('processHeader', () => {
   beforeEach(() => {
