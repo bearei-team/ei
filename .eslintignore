@@ -1,0 +1,4 @@
+lib/
+test/
+jest.config.ts
+webpack.*.ts
