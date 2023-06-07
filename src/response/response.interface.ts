@@ -26,6 +26,6 @@ export interface RequestResponse extends Pick<ProcessResponseOption, 'header'> {
   url: string;
 }
 
-export interface ProcessDataOption extends RequestResponse {
+export interface ProcessResponseDataOption extends RequestResponse {
   option: FetchOption;
 }

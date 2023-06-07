@@ -1,19 +1,18 @@
 export * from './core';
+export * from './core/core.interface';
 export * from './data';
+export * from './data/data.interface';
 export * from './error';
+export * from './error/error.interface';
 export * from './header';
+export * from './header/header.interface';
 export * from './option';
+export * from './option/option.interface';
 export * from './response';
+export * from './response/response.interface';
 export * from './url';
-export { option };
-export { data, error, header, response, url };
+export * from './url/url.interface';
 
 import ei from './core';
-import { default as data } from './data';
-import { default as error } from './error';
-import { default as header } from './header';
-import * as option from './option';
-import { default as response } from './response';
-import { default as url } from './url';
 
 export default ei;

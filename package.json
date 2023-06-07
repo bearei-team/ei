@@ -1,6 +1,6 @@
 {
   "name": "@bearei/ei",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "main": "./lib/commonjs/index",
   "module": "./lib/module/index",
   "types": "./lib/commonjs/index.d.ts",

@@ -1,6 +1,6 @@
 import type {
   ContentType,
-  ProcessDataOption,
+  ProcessResponseDataOption,
   ProcessResponseOption,
 } from './response.interface';
 
@@ -30,10 +30,10 @@ const contentTypeMap: Record<string, ContentType> = {
   'application/vnd.ms-excel': 'file',
 };
 
-const processData = async (
+const processResponseData = async (
   response: Response,
   type: ContentType,
-  option: ProcessDataOption,
+  option: ProcessResponseDataOption,
 ) => {
   const data = await parseFunctionMap[type](response);
   const result = { ...option, data };
@@ -64,7 +64,7 @@ const processResponse =
     const contentType = header['content-type'];
     const type = getContentType(contentType);
 
-    return processData(response, type, {
+    return processResponseData(response, type, {
       status,
       statusText,
       header,
