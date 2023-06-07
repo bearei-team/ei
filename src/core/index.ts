@@ -1,7 +1,7 @@
 import processData from '../data';
 import processError from '../error';
 import processHeader from '../header';
-import { option as globalOption } from '../option';
+import * as globalOption from '../option';
 import processResponse from '../response';
 import processURL from '../url';
 import type { FetchOption } from './ei';

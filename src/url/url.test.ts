@@ -1,5 +1,5 @@
 import processURL from '.';
-import { option as globalOption } from '../option';
+import * as globalOption from '../option';
 
 describe('processURL', () => {
   beforeEach(() => {
