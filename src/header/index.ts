@@ -1,5 +1,5 @@
 import * as globalOption from '../option';
-import type { Header, Headers } from './header';
+import type { Header, Headers } from './header.interface';
 
 const createHeaderObject = <T extends Headers>(headers: T) =>
   Array.isArray(headers)

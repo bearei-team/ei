@@ -1,4 +1,4 @@
-import processData from '.';
+import processData from '../src/data';
 
 describe('processData', () => {
   it('should stringify data if it is JSON content', () => {

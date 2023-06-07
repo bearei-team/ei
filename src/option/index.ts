@@ -1,4 +1,4 @@
-import type { Option } from './option';
+import type { Option } from './option.interface';
 
 const optionMap = new Map<string, unknown>();
 

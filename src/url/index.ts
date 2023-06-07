@@ -1,5 +1,5 @@
 import * as globalOption from '../option';
-import type { URLOption } from './url';
+import type { URLOption } from './url.interface';
 
 const processFullURL = (url: string) => {
   if (!RegExp(/^(http|https):\/\//).exec(url)) {

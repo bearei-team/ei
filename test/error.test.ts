@@ -1,4 +1,4 @@
-import processError from '.';
+import processError from '../src/error';
 
 describe('processError', () => {
   const mockOption = {};

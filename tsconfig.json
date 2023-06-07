@@ -26,5 +26,15 @@
       "module": "commonjs"
     }
   },
-  "include": ["src", "types"]
+  "include": [
+    "src",
+    "types",
+    "test/core.test.ts",
+    "test/data.test.ts",
+    "test/error.test.ts",
+    "test/header.test.ts",
+    "test/option.test.ts",
+    "test/response.test.ts",
+    "test/url.test.ts"
+  ]
 }

@@ -1,4 +1,4 @@
-import type { ProcessErrorOption } from './error';
+import type { ProcessErrorOption } from './error.interface';
 
 const isAborted = (error: Record<string, unknown>) =>
   (error.type as string)?.toLowerCase() === 'aborted' ||
