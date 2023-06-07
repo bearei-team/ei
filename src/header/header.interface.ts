@@ -1,7 +1,6 @@
-import type { FetchOption } from '../core/ei';
+import type { FetchOption } from '../core/core.interface';
 
 export type Headers = FetchOption['headers'];
 export type Header = {
-  'content-type'?: string;
   [key: string]: string;
 };

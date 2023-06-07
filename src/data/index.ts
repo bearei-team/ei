@@ -1,4 +1,4 @@
-import type { ProcessDataOption } from './data';
+import type { ProcessDataOption } from './data.interface';
 
 const isJSONContent = (data: unknown, contentType?: string) =>
   typeof data === 'object' &&

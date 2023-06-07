@@ -4,7 +4,7 @@ import processHeader from '../header';
 import * as globalOption from '../option';
 import processResponse from '../response';
 import processURL from '../url';
-import type { FetchOption } from './ei';
+import type { FetchOption } from './core.interface';
 
 const createRequest = () => {
   const createRequestOption = (

@@ -2,7 +2,7 @@ import type {
   ContentType,
   ProcessDataOption,
   ProcessResponseOption,
-} from './response';
+} from './response.interface';
 
 const parseFunctionMap: Record<
   ContentType,

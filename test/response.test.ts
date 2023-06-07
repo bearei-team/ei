@@ -1,4 +1,4 @@
-import processResponse from '.';
+import processResponse from '../src/response';
 
 describe('processResponse', () => {
   it('should process response with successful status', async () => {

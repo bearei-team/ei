@@ -1,5 +1,5 @@
-import processHeader from '.';
-import * as option from '../option';
+import processHeader from '../src/header';
+import * as option from '../src/option';
 
 describe('processHeader', () => {
   beforeEach(() => {

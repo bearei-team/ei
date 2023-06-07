@@ -1,4 +1,4 @@
-import type { FetchOption } from '../core/ei';
+import type { FetchOption } from '../core/core.interface';
 
 export type ContentType = 'json' | 'text' | 'octetStream' | 'file';
 

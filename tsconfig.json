@@ -26,5 +26,5 @@
       "module": "commonjs"
     }
   },
-  "include": ["src", "types"]
+  "include": ["src", "types", "test"]
 }
