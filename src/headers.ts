@@ -42,7 +42,7 @@ const defaultHeaders: Record<string, string> = {
 export const processHeaders = (
   options: Headers = {},
 ): Record<string, string> => {
-  const headers = globalOption.get('headers') as Headers;
+  const headers = globalOption.get('headers');
   const configHeaders = createHeadersObject(headers);
   const newHeaders = createHeadersObject(options);
 

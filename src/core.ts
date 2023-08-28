@@ -103,9 +103,7 @@ const createFetch = (): CreateFetchResult => {
     const processedHeaders = processHeaders(headers);
     const processedData = processData({ data, headers: processedHeaders });
     const processedURL = processURL(url ?? requestURL, { param, isEncode });
-    const requestTimeout = (timeout ??
-      globalOptions.get('timeout') ??
-      3000) as number;
+    const requestTimeout = timeout ?? globalOptions.get('timeout') ?? 3000;
 
     return {
       method,

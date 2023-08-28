@@ -4,14 +4,15 @@ export type Options = Partial<
   Pick<FetchOptions, 'headers' | 'timeout' | 'baseUrl'>
 >;
 
-const optionsMap = new Map<keyof Options, unknown>();
+const optionsMap = new Map<string, unknown>();
 
 export const clear = (): void => optionsMap.clear();
-export const set = (options: Options): void => {
-  clear();
-  Object.entries(options).forEach(([key, value]) =>
-    optionsMap.set(key as keyof Options, value),
-  );
+export const set = <K extends keyof Options>(
+  key: K,
+  value: Options[K],
+): void => {
+  optionsMap.set(key, value);
 };
 
-export const get = (key: keyof Options): unknown => optionsMap.get(key);
+export const get = <K extends keyof Options>(key: K): Options[K] =>
+  optionsMap.get(key) as Options[K];

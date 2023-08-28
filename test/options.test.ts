@@ -2,18 +2,18 @@ import * as options from '../src/options';
 
 describe('options', () => {
   beforeEach(() => {
-    options.set({});
+    options.clear();
   });
 
   afterEach(() => {
-    options.set({});
+    options.clear();
   });
 
   it('should set and get options value', () => {
     const key = 'baseUrl';
     const value = 'www.bear_ei_api.com';
 
-    options.set({ [key]: value });
+    options.set(key, value);
 
     const retrievedValue = options.get(key);
 
@@ -24,8 +24,8 @@ describe('options', () => {
     const key = 'baseUrl';
     const value = 'www.bear_ei_api.com';
 
-    options.set({ [key]: value });
-    options.set({});
+    options.set(key, value);
+    options.clear();
 
     const retrievedValue = options.get(key);
 
