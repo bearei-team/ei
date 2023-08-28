@@ -1,8 +1,35 @@
-import type {
-  ContentType,
-  ProcessResponseDataOption,
-  ProcessResponseOption,
-} from './response.interface';
+import type { FetchOptions, FetchResponse } from '@/core';
+
+export type ContentType = 'json' | 'text' | 'octetStream' | 'file';
+
+export interface ProcessResponseOptions extends FetchOptions {
+  /**
+   * Custom request headers
+   */
+  header?: Record<string, string>;
+}
+
+export interface RequestResponse
+  extends Pick<ProcessResponseOptions, 'header'> {
+  /**
+   * The HTTP status code of the request response
+   */
+  status: number;
+
+  /**
+   * A textual description of the HTTP status code for the request response
+   */
+  statusText: string;
+
+  /**
+   * The server URL to use for the request
+   */
+  url: string;
+}
+
+export interface ProcessResponseDataOptions extends RequestResponse {
+  options: FetchOptions;
+}
 
 const parseFunctionMap: Record<
   ContentType,
@@ -33,23 +60,23 @@ const contentTypeMap: Record<string, ContentType> = {
 const processResponseData = async (
   response: Response,
   type: ContentType,
-  option: ProcessResponseDataOption,
-) => {
+  options: ProcessResponseDataOptions,
+): Promise<FetchResponse> => {
   const data = await parseFunctionMap[type](response);
-  const result = { ...option, data };
+  const result = { ...options, data };
 
   return response.ok
     ? result
     : Promise.reject({ ...result, name: 'HTTPError' });
 };
 
-const extractHeader = (response: Response) =>
+const extractHeader = (response: Response): Record<string, unknown> =>
   [...response.headers.entries()].reduce(
     (accumulator, [key, value]) => ({ ...accumulator, [key]: value }),
     {},
   );
 
-const getContentType = (contentType?: string) => {
+const getContentType = (contentType?: string): ContentType => {
   const contentTypeKey = Object.keys(contentTypeMap).find(key =>
     contentType?.startsWith(key),
   );
@@ -57,8 +84,9 @@ const getContentType = (contentType?: string) => {
   return contentTypeKey ? contentTypeMap[contentTypeKey] : 'text';
 };
 
-const processResponse =
-  (option: ProcessResponseOption) => async (response: Response) => {
+export const processResponse =
+  (options: ProcessResponseOptions) =>
+  async (response: Response): Promise<FetchResponse> => {
     const { status, statusText, url } = response;
     const header = extractHeader(response) as Record<string, string>;
     const contentType = header['content-type'];
@@ -69,8 +97,6 @@ const processResponse =
       statusText,
       header,
       url,
-      option,
+      options,
     });
   };
-
-export default processResponse;

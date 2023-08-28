@@ -1,9 +1,9 @@
-import processHeader from '../src/header';
-import * as option from '../src/option';
+import { processHeaders } from '../src/headers';
+import * as options from '../src/options';
 
 describe('processHeader', () => {
   beforeEach(() => {
-    jest.spyOn(option, 'get').mockReturnValue(undefined);
+    jest.spyOn(options, 'get').mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -28,9 +28,9 @@ describe('processHeader', () => {
       'x-another-header': 'another-value',
     };
 
-    jest.spyOn(option, 'get').mockReturnValue(optionHeader);
+    jest.spyOn(options, 'get').mockReturnValue(optionHeader);
 
-    const processedHeader = processHeader(customHeader);
+    const processedHeader = processHeaders(customHeader);
 
     expect(processedHeader).toEqual(expectedMergedHeader);
   });
@@ -47,7 +47,7 @@ describe('processHeader', () => {
       'x-custom-header': 'custom-value',
     };
 
-    const processedHeader = processHeader(customHeader);
+    const processedHeader = processHeaders(customHeader);
 
     expect(processedHeader).toEqual(expectedModifiedHeader);
   });
@@ -58,7 +58,7 @@ describe('processHeader', () => {
       accept: '*/*',
     };
 
-    const processedHeader = processHeader();
+    const processedHeader = processHeaders();
 
     expect(processedHeader).toEqual(expectedDefaultHeader);
   });
@@ -69,13 +69,13 @@ describe('processHeader', () => {
       accept: '*/*',
     };
 
-    const processedHeader = processHeader({});
+    const processedHeader = processHeaders({});
 
     expect(processedHeader).toEqual(expectedDefaultHeader);
   });
 
   it('should merge config headers and default headers', () => {
-    jest.spyOn(option, 'get').mockReturnValue([['x-api-key', '123456']]);
+    jest.spyOn(options, 'get').mockReturnValue([['x-api-key', '123456']]);
 
     const expectedHeader = {
       'content-type': 'application/json; charset=utf-8',
@@ -83,6 +83,6 @@ describe('processHeader', () => {
       'x-api-key': '123456',
     };
 
-    expect(processHeader()).toEqual(expectedHeader);
+    expect(processHeaders()).toEqual(expectedHeader);
   });
 });

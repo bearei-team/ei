@@ -1,7 +1,9 @@
-import * as globalOption from '../option';
-import type { URLOption } from './url.interface';
+import type { FetchOptions } from '@/core';
+import * as globalOption from './options';
 
-const processFullURL = (url: string) => {
+export type URLOptions = Partial<Pick<FetchOptions, 'param' | 'isEncode'>>;
+
+const processFullURL = (url: string): URL => {
   if (!RegExp(/^(http|https):\/\//).exec(url)) {
     url = `${globalOption.get('baseURL')}${url}`;
   }
@@ -9,16 +11,18 @@ const processFullURL = (url: string) => {
   return new URL(url);
 };
 
-const getQueryParam = (searchParam: URLSearchParams) =>
+const getQueryParam = (
+  searchParam: URLSearchParams,
+): Record<string, string | null> =>
   Array.from(searchParam.keys()).reduce<Record<string, string | null>>(
     (query, key) => ({ ...query, [key]: searchParam.get(key) }),
     {},
   );
 
-const processURL = (
+export const processURL = (
   url: string,
-  { param = {}, isEncode = true }: URLOption = {},
-) => {
+  { param = {}, isEncode = true }: URLOptions = {},
+): string => {
   const { searchParams, origin, pathname } = processFullURL(url);
   const newURL = `${origin}${pathname !== '/' ? pathname : ''}`;
   const queryParam = getQueryParam(searchParams);
@@ -40,5 +44,3 @@ const processURL = (
 
   return queryString ? `${newURL}?${queryString}` : newURL;
 };
-
-export default processURL;

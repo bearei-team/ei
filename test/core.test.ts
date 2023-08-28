@@ -1,5 +1,5 @@
 import fetch from 'jest-fetch-mock';
-import ei from '../src/core';
+import { ei } from '../src/core';
 
 describe('core', () => {
   beforeAll(() => {
