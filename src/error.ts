@@ -1,10 +1,15 @@
-import type { FetchOptions } from '@/core';
-export type ProcessErrorOptions = FetchOptions;
+import type { FetchOptions, FetchResponse } from '@/core';
 
-export interface EnrichErrorResult {
-  status?: number;
-  statusText?: string;
+export interface EnrichErrorResult
+  extends Partial<Pick<FetchResponse, 'options' | 'status' | 'statusText'>> {
+  /**
+   * Error message description
+   */
   message?: string;
+
+  /**
+   * Error name
+   */
   name?: string;
   options: FetchOptions;
 }
@@ -17,22 +22,20 @@ const isAborted = (error: Record<string, unknown>): boolean =>
 
 const enrichError = (
   error: Record<string, unknown>,
-  options: ProcessErrorOptions,
+  options: FetchOptions,
 ): EnrichErrorResult => ({
   ...error,
+  ...(isAborted(error) && {
+    status: 408,
+    statusText: 'Timeout',
+    message: 'Timeout',
+    name: 'TimeoutError',
+  }),
   options,
-  ...(isAborted(error)
-    ? {
-        status: 408,
-        statusText: 'Timeout',
-        message: 'Timeout',
-        name: 'TimeoutError',
-      }
-    : {}),
 });
 
 export const processError =
-  (options: ProcessErrorOptions) =>
+  (options: FetchOptions) =>
   (error: unknown): never => {
     if (typeof error === 'object' && error !== null) {
       throw enrichError(error as Record<string, unknown>, options);

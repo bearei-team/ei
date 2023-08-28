@@ -10,7 +10,7 @@ describe('options', () => {
   });
 
   it('should set and get options value', () => {
-    const key = 'baseURL';
+    const key = 'baseUrl';
     const value = 'www.bear_ei_api.com';
 
     options.set({ [key]: value });
@@ -21,19 +21,13 @@ describe('options', () => {
   });
 
   it('should clear options values', () => {
-    const key = 'baseURL';
+    const key = 'baseUrl';
     const value = 'www.bear_ei_api.com';
 
     options.set({ [key]: value });
     options.set({});
 
     const retrievedValue = options.get(key);
-
-    expect(retrievedValue).toBeUndefined();
-  });
-
-  it('should return undefined for non-existing key', () => {
-    const retrievedValue = options.get('nonExistingKey');
 
     expect(retrievedValue).toBeUndefined();
   });

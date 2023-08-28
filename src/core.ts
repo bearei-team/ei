@@ -6,7 +6,6 @@ import { processResponse } from './response';
 import { processURL } from './url';
 
 export type DataType = RequestInit['body'] | Record<string, unknown>;
-
 export interface FetchOptions extends Omit<RequestInit, 'body' | 'headers'> {
   /**
    * HTTP request method
@@ -31,7 +30,7 @@ export interface FetchOptions extends Omit<RequestInit, 'body' | 'headers'> {
   /**
    * Will be automatically prepended to `url`, except `url` is an absolute URL
    */
-  baseURL?: string;
+  baseUrl?: string;
 
   /**
    * The data to be sent as the request body
@@ -46,7 +45,7 @@ export interface FetchOptions extends Omit<RequestInit, 'body' | 'headers'> {
   /**
    * Custom request headers
    */
-  headers?: [string, string][] | Record<string, string>;
+  headers?: Record<string, string>;
 }
 
 export interface FetchResponse {
@@ -78,7 +77,7 @@ export interface FetchResponse {
   headers?: Record<string, string>;
 }
 
-export interface CreateRequestResult {
+export interface CreateFetchResult {
   (url: string, options?: FetchOptions): Promise<FetchResponse>;
 
   /**
@@ -87,8 +86,8 @@ export interface CreateRequestResult {
   options: typeof globalOptions;
 }
 
-const createRequest = (): CreateRequestResult => {
-  const createRequestOption = (
+const createFetch = (): CreateFetchResult => {
+  const createFetchOptions = (
     url: string,
     {
       url: requestURL,
@@ -139,9 +138,9 @@ const createRequest = (): CreateRequestResult => {
     url: string,
     options: FetchOptions = {},
   ): Promise<FetchResponse> => {
-    const requestOption = createRequestOption(url, options);
+    const requestOptions = createFetchOptions(url, options);
 
-    return performRequest(requestOption);
+    return performRequest(requestOptions);
   };
 
   request.options = globalOptions;
@@ -149,4 +148,4 @@ const createRequest = (): CreateRequestResult => {
   return request;
 };
 
-export const ei = createRequest();
+export const ei = createFetch();

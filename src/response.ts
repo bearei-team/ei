@@ -1,23 +1,22 @@
 import type { FetchOptions, FetchResponse } from '@/core';
 
 export type ContentType = 'json' | 'text' | 'octetStream' | 'file';
-
-export interface ProcessResponseOptions extends FetchOptions {
+export interface ProcessResponseOptions extends Omit<FetchOptions, 'headers'> {
   /**
    * Custom request headers
    */
-  header?: Record<string, string>;
+  headers?: Record<string, string>;
 }
 
 export interface RequestResponse
-  extends Pick<ProcessResponseOptions, 'header'> {
+  extends Pick<ProcessResponseOptions, 'headers'> {
   /**
-   * The HTTP status code of the request response
+   * Response HTTP status code
    */
   status: number;
 
   /**
-   * A textual description of the HTTP status code for the request response
+   * Response HTTP status code description
    */
   statusText: string;
 
@@ -35,10 +34,10 @@ const parseFunctionMap: Record<
   ContentType,
   (response: Response) => Promise<unknown>
 > = {
-  json: (response: Response) => response.json(),
-  text: (response: Response) => response.text(),
-  file: (response: Response) => response.blob(),
-  octetStream: async (response: Response) => {
+  json: (response: Response): Promise<unknown> => response.json(),
+  text: (response: Response): Promise<string> => response.text(),
+  file: (response: Response): Promise<Blob> => response.blob(),
+  octetStream: async (response: Response): Promise<unknown> => {
     const body = await response.text();
 
     try {
@@ -70,7 +69,7 @@ const processResponseData = async (
     : Promise.reject({ ...result, name: 'HTTPError' });
 };
 
-const extractHeader = (response: Response): Record<string, unknown> =>
+const extractHeaders = (response: Response): Record<string, string> =>
   [...response.headers.entries()].reduce(
     (accumulator, [key, value]) => ({ ...accumulator, [key]: value }),
     {},
@@ -88,14 +87,14 @@ export const processResponse =
   (options: ProcessResponseOptions) =>
   async (response: Response): Promise<FetchResponse> => {
     const { status, statusText, url } = response;
-    const header = extractHeader(response) as Record<string, string>;
-    const contentType = header['content-type'];
+    const headers = extractHeaders(response);
+    const contentType = headers['content-type'];
     const type = getContentType(contentType);
 
     return processResponseData(response, type, {
       status,
       statusText,
-      header,
+      headers,
       url,
       options,
     });

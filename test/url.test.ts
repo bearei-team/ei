@@ -3,7 +3,7 @@ import { processURL } from '../src/url';
 
 describe('processURL', () => {
   beforeEach(() => {
-    globalOptions.set({ baseURL: 'https://example.com' });
+    globalOptions.set({ baseUrl: 'https://example.com' });
   });
 
   it('should process URL without query parameters', () => {
@@ -53,7 +53,7 @@ describe('processURL', () => {
     const url = '/path/to/resource';
     const options = { param: { foo: 'bar' } };
 
-    globalOptions.set({ baseURL: 'https://example.com/api' });
+    globalOptions.set({ baseUrl: 'https://example.com/api' });
 
     const result = processURL(url, options);
 

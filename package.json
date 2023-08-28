@@ -1,6 +1,6 @@
 {
   "name": "@bearei/ei",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "main": "./lib/commonjs/index",
   "module": "./lib/module/index",
   "types": "./lib/commonjs/index.d.ts",
@@ -21,14 +21,10 @@
   "bugs": {
     "url": "https://github.com/bearei-team/ei/issues"
   },
-  "dependencies": {
-    "isomorphic-fetch": "^3.0.0"
-  },
   "devDependencies": {
     "@babel/core": "^7.20.2",
     "@babel/preset-env": "^7.20.2",
     "@types/glob": "^8.0.0",
-    "@types/isomorphic-fetch": "^0.0.36",
     "@types/jest": "^29.2.2",
     "@types/node": "^18.11.9",
     "@types/webpack": "^5.28.0",

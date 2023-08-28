@@ -12,7 +12,7 @@ const createHeadersObject = <T extends Headers>(
         (accumulator, [key, value]) => ({ ...accumulator, [key]: value }),
         {},
       )
-    : (headers as Record<string, string>);
+    : headers;
 
 const mergeHeaders = (
   defaultHeaders: Record<string, string>,
