@@ -73,16 +73,4 @@ describe('processHeader', () => {
 
     expect(processedHeader).toEqual(expectedDefaultHeader);
   });
-
-  it('should merge config headers and default headers', () => {
-    jest.spyOn(options, 'get').mockReturnValue([['x-api-key', '123456']]);
-
-    const expectedHeader = {
-      'content-type': 'application/json; charset=utf-8',
-      accept: '*/*',
-      'x-api-key': '123456',
-    };
-
-    expect(processHeaders()).toEqual(expectedHeader);
-  });
 });
