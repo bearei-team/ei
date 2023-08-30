@@ -1,4 +1,4 @@
-import { processError } from '../src/error';
+import { CREATE_PROCESS_ERROR } from '../src/error';
 
 describe('processError', () => {
   const mockOptions = {};
@@ -13,7 +13,7 @@ describe('processError', () => {
       name: 'TimeoutError',
     };
 
-    expect(() => processError(mockOptions)(mockError)).toThrowError(
+    expect(() => CREATE_PROCESS_ERROR(mockOptions)(mockError)).toThrowError(
       expectedEnrichedError,
     );
   });
@@ -21,12 +21,16 @@ describe('processError', () => {
   it('should throw error as is if error is not an object', () => {
     const mockError = 'Some error';
 
-    expect(() => processError(mockOptions)(mockError)).toThrowError(mockError);
+    expect(() => CREATE_PROCESS_ERROR(mockOptions)(mockError)).toThrowError(
+      mockError,
+    );
   });
 
   it('should throw error as is if error is undefined', () => {
     const mockError = undefined;
 
-    expect(() => processError(mockOptions)(mockError)).toThrowError(mockError);
+    expect(() => CREATE_PROCESS_ERROR(mockOptions)(mockError)).toThrowError(
+      mockError,
+    );
   });
 });

@@ -1,5 +1,5 @@
 import * as globalOptions from '../src/options';
-import { processURL } from '../src/url';
+import { PROCESS_URL } from '../src/url';
 
 describe('processURL', () => {
   beforeEach(() => {
@@ -8,7 +8,7 @@ describe('processURL', () => {
 
   it('should process URL without query parameters', () => {
     const url = '/path/to/resource';
-    const result = processURL(url);
+    const result = PROCESS_URL(url);
 
     expect(result).toBe('https://example.com/path/to/resource');
   });
@@ -16,7 +16,7 @@ describe('processURL', () => {
   it('should process URL with query parameters', () => {
     const url = '/path/to/resource';
     const options = { param: { foo: 'bar', baz: 123 } };
-    const result = processURL(url, options);
+    const result = PROCESS_URL(url, options);
 
     expect(result).toBe('https://example.com/path/to/resource?foo=bar&baz=123');
   });
@@ -28,7 +28,7 @@ describe('processURL', () => {
       isEncode: true,
     };
 
-    const result = processURL(url, options);
+    const result = PROCESS_URL(url, options);
 
     expect(result).toBe(
       'https://example.com/path/to/resource?foo=hello%20world&bar=test%40example.com',
@@ -42,7 +42,7 @@ describe('processURL', () => {
       isEncode: false,
     };
 
-    const result = processURL(url, options);
+    const result = PROCESS_URL(url, options);
 
     expect(result).toBe(
       'https://example.com/path/to/resource?foo=hello world&bar=test@example.com',
@@ -55,7 +55,7 @@ describe('processURL', () => {
 
     globalOptions.set('baseUrl', 'https://example.com/api');
 
-    const result = processURL(url, options);
+    const result = PROCESS_URL(url, options);
 
     expect(result).toBe('https://example.com/api/path/to/resource?foo=bar');
   });

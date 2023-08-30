@@ -39,14 +39,14 @@ const defaultHeaders: Record<string, string> = {
   accept: '*/*',
 };
 
-export const processHeaders = (
+export const PROCESS_HEADERS = (
   options: Headers = {},
 ): Record<string, string> => {
   const headers = globalOption.get('headers');
-  const configHeaders = createHeadersObject(headers);
+  const globalHeaders = createHeadersObject(headers);
   const newHeaders = createHeadersObject(options);
 
   return removeContentType(
-    mergeHeaders(mergeHeaders(defaultHeaders, configHeaders), newHeaders),
+    mergeHeaders(mergeHeaders(defaultHeaders, globalHeaders), newHeaders),
   );
 };

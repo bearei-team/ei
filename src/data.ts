@@ -1,4 +1,4 @@
-import type { FetchOptions } from '@/core';
+import type { DataType, FetchOptions } from '@/core';
 
 export interface ProcessDataOptions extends Pick<FetchOptions, 'data'> {
   /**
@@ -8,12 +8,17 @@ export interface ProcessDataOptions extends Pick<FetchOptions, 'data'> {
 }
 
 const isJSONContent = (
-  data: unknown,
+  data: DataType,
   contentType?: string,
 ): boolean | undefined =>
   typeof data === 'object' &&
   data !== null &&
   contentType?.startsWith('application/json');
 
-export const processData = ({ data, headers }: ProcessDataOptions): unknown =>
-  isJSONContent(data, headers['content-type']) ? JSON.stringify(data) : data;
+export const PROCESS_DATA = ({
+  data,
+  headers,
+}: ProcessDataOptions): BodyInit | null =>
+  (isJSONContent(data, headers['content-type'])
+    ? JSON.stringify(data)
+    : data) as BodyInit;

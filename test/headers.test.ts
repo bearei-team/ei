@@ -1,4 +1,4 @@
-import { processHeaders } from '../src/headers';
+import { PROCESS_HEADERS } from '../src/headers';
 import * as options from '../src/options';
 
 describe('processHeader', () => {
@@ -30,7 +30,7 @@ describe('processHeader', () => {
 
     jest.spyOn(options, 'get').mockReturnValue(optionHeader);
 
-    const processedHeader = processHeaders(customHeader);
+    const processedHeader = PROCESS_HEADERS(customHeader);
 
     expect(processedHeader).toEqual(expectedMergedHeader);
   });
@@ -47,7 +47,7 @@ describe('processHeader', () => {
       'x-custom-header': 'custom-value',
     };
 
-    const processedHeader = processHeaders(customHeader);
+    const processedHeader = PROCESS_HEADERS(customHeader);
 
     expect(processedHeader).toEqual(expectedModifiedHeader);
   });
@@ -58,7 +58,7 @@ describe('processHeader', () => {
       accept: '*/*',
     };
 
-    const processedHeader = processHeaders();
+    const processedHeader = PROCESS_HEADERS();
 
     expect(processedHeader).toEqual(expectedDefaultHeader);
   });
@@ -69,7 +69,7 @@ describe('processHeader', () => {
       accept: '*/*',
     };
 
-    const processedHeader = processHeaders({});
+    const processedHeader = PROCESS_HEADERS({});
 
     expect(processedHeader).toEqual(expectedDefaultHeader);
   });

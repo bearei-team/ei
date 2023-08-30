@@ -1,12 +1,12 @@
-import { processData } from './data';
-import { processError } from './error';
-import { processHeaders } from './headers';
+import { PROCESS_DATA } from './data';
+import { CREATE_PROCESS_ERROR } from './error';
+import { PROCESS_HEADERS } from './headers';
 import * as globalOptions from './options';
-import { processResponse } from './response';
-import { processURL } from './url';
+import { CREATE_PROCESS_RESPONSE } from './response';
+import { PROCESS_URL } from './url';
 
 export type DataType = RequestInit['body'] | Record<string, unknown>;
-export interface FetchOptions extends Omit<RequestInit, 'body' | 'headers'> {
+export interface FetchOptions extends Omit<RequestInit, 'headers'> {
   /**
    * HTTP request method
    */
@@ -77,7 +77,7 @@ export interface FetchResponse {
   headers?: Record<string, string>;
 }
 
-export interface CreateFetchResult {
+export interface CreatedFetch {
   (url: string, options?: FetchOptions): Promise<FetchResponse>;
 
   /**
@@ -86,7 +86,7 @@ export interface CreateFetchResult {
   options: typeof globalOptions;
 }
 
-const createFetch = (): CreateFetchResult => {
+const createFetch = (): CreatedFetch => {
   const createFetchOptions = (
     url: string,
     {
@@ -99,51 +99,55 @@ const createFetch = (): CreateFetchResult => {
       isEncode,
       ...args
     }: FetchOptions = {},
-  ) => {
-    const processedHeaders = processHeaders(headers);
-    const processedData = processData({ data, headers: processedHeaders });
-    const processedURL = processURL(url ?? requestURL, { param, isEncode });
-    const requestTimeout = timeout ?? globalOptions.get('timeout') ?? 3000;
+  ): FetchOptions => {
+    const processedHeaders = PROCESS_HEADERS(headers);
+    const processedData = PROCESS_DATA({ data, headers: processedHeaders });
+    const processedURL = PROCESS_URL(url ?? requestURL, {
+      param,
+      isEncode,
+    });
+
+    const fetchTimeout = timeout ?? globalOptions.get('timeout') ?? 3000;
 
     return {
       method,
       headers: processedHeaders,
       body: processedData,
       url: processedURL,
-      timeout: requestTimeout,
+      timeout: fetchTimeout,
       ...args,
     };
   };
 
-  const performRequest = (options: FetchOptions): Promise<FetchResponse> => {
+  const performFetch = (options: FetchOptions): Promise<FetchResponse> => {
     const abort = new AbortController();
     const signal = abort.signal;
     const timer = setTimeout(() => abort.abort(), options.timeout);
-    const performProcessResponse = processResponse(options);
-    const performProcessError = processError(options);
+    const processResponse = CREATE_PROCESS_RESPONSE(options);
+    const processError = CREATE_PROCESS_ERROR(options);
     const processFinally = (): void => {
       timer.unref?.();
       clearTimeout(timer);
     };
 
     return fetch(options.url!, { signal, ...options })
-      .then(performProcessResponse)
-      .catch(performProcessError)
+      .then(processResponse)
+      .catch(processError)
       .finally(processFinally);
   };
 
-  const request = (
+  const createdFetch = (
     url: string,
     options: FetchOptions = {},
   ): Promise<FetchResponse> => {
-    const requestOptions = createFetchOptions(url, options);
+    const createdFetchOptions = createFetchOptions(url, options);
 
-    return performRequest(requestOptions);
+    return performFetch(createdFetchOptions);
   };
 
-  request.options = globalOptions;
+  createdFetch.options = globalOptions;
 
-  return request;
+  return createdFetch;
 };
 
-export const ei = createFetch();
+export const EI = createFetch();

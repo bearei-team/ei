@@ -1,6 +1,6 @@
 import type { FetchOptions, FetchResponse } from '@/core';
 
-export interface EnrichErrorResult
+export interface EnrichedError
   extends Partial<Pick<FetchResponse, 'options' | 'status' | 'statusText'>> {
   /**
    * Error message description
@@ -11,7 +11,6 @@ export interface EnrichErrorResult
    * Error name
    */
   name?: string;
-  options: FetchOptions;
 }
 
 const isAborted = (error: Record<string, unknown>): boolean =>
@@ -23,7 +22,7 @@ const isAborted = (error: Record<string, unknown>): boolean =>
 const enrichError = (
   error: Record<string, unknown>,
   options: FetchOptions,
-): EnrichErrorResult => ({
+): EnrichedError => ({
   ...error,
   ...(isAborted(error) && {
     status: 408,
@@ -34,7 +33,7 @@ const enrichError = (
   options,
 });
 
-export const processError =
+export const CREATE_PROCESS_ERROR =
   (options: FetchOptions) =>
   (error: unknown): never => {
     if (typeof error === 'object' && error !== null) {

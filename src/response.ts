@@ -1,7 +1,8 @@
 import type { FetchOptions, FetchResponse } from '@/core';
 
 export type ContentType = 'json' | 'text' | 'octetStream' | 'file';
-export interface ProcessResponseOptions extends Omit<FetchOptions, 'headers'> {
+export interface CreateProcessResponseOptions
+  extends Omit<FetchOptions, 'headers'> {
   /**
    * Custom request headers
    */
@@ -9,7 +10,7 @@ export interface ProcessResponseOptions extends Omit<FetchOptions, 'headers'> {
 }
 
 export interface RequestResponse
-  extends Pick<ProcessResponseOptions, 'headers'> {
+  extends Pick<CreateProcessResponseOptions, 'headers'> {
   /**
    * Response HTTP status code
    */
@@ -83,8 +84,8 @@ const getContentType = (contentType?: string): ContentType => {
   return contentTypeKey ? contentTypeMap[contentTypeKey] : 'text';
 };
 
-export const processResponse =
-  (options: ProcessResponseOptions) =>
+export const CREATE_PROCESS_RESPONSE =
+  (options: CreateProcessResponseOptions) =>
   async (response: Response): Promise<FetchResponse> => {
     const { status, statusText, url } = response;
     const headers = extractHeaders(response);

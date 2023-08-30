@@ -1,4 +1,4 @@
-import { processResponse } from '../src/response';
+import { CREATE_PROCESS_RESPONSE } from '../src/response';
 
 describe('processResponse', () => {
   it('should process response with successful status', async () => {
@@ -9,7 +9,7 @@ describe('processResponse', () => {
       headers: { 'content-type': 'application/json' },
     });
 
-    const result = await processResponse(options)(response);
+    const result = await CREATE_PROCESS_RESPONSE(options)(response);
 
     expect(result).toEqual({
       status: 200,
@@ -29,7 +29,7 @@ describe('processResponse', () => {
       headers: { 'content-type': 'application/json' },
     });
 
-    await expect(processResponse(options)(response)).rejects.toEqual({
+    await expect(CREATE_PROCESS_RESPONSE(options)(response)).rejects.toEqual({
       status: 404,
       statusText: 'Not Found',
       headers: { 'content-type': 'application/json' },
@@ -48,7 +48,7 @@ describe('processResponse', () => {
       headers: { 'content-type': 'application/json' },
     });
 
-    const result = await processResponse(options)(response);
+    const result = await CREATE_PROCESS_RESPONSE(options)(response);
 
     expect(result.data).toEqual({ message: 'Success' });
   });
@@ -61,7 +61,7 @@ describe('processResponse', () => {
       headers: { 'content-type': 'text/plain' },
     });
 
-    const result = await processResponse(options)(response);
+    const result = await CREATE_PROCESS_RESPONSE(options)(response);
 
     expect(result.data).toEqual('Hello, World!');
   });
@@ -74,7 +74,7 @@ describe('processResponse', () => {
       headers: { 'content-type': 'application/octet-stream' },
     });
 
-    const result = await processResponse(options)(response);
+    const result = await CREATE_PROCESS_RESPONSE(options)(response);
 
     expect(result.data).toEqual({ data: 'Binary data' });
   });
@@ -87,7 +87,7 @@ describe('processResponse', () => {
       headers: { 'content-type': 'application/vnd.ms-excel' },
     });
 
-    const result = await processResponse(options)(response);
+    const result = await CREATE_PROCESS_RESPONSE(options)(response);
 
     expect(result.data).toBeInstanceOf(Blob);
   });
@@ -100,7 +100,7 @@ describe('processResponse', () => {
       headers: { 'content-type': 'text/html' },
     });
 
-    const result = await processResponse(options)(response);
+    const result = await CREATE_PROCESS_RESPONSE(options)(response);
 
     expect(result.data).toEqual('<html><body><h1>Hello</h1></body></html>');
   });

@@ -1,4 +1,4 @@
-import { processData } from '../src/data';
+import { PROCESS_DATA } from '../src/data';
 
 describe('processData', () => {
   it('should stringify data if it is JSON content', () => {
@@ -7,7 +7,7 @@ describe('processData', () => {
       headers: { 'content-type': 'application/json' },
     };
 
-    const result = processData(options);
+    const result = PROCESS_DATA(options);
     const expected = JSON.stringify(options.data);
 
     expect(result).toEqual(expected);
@@ -19,7 +19,7 @@ describe('processData', () => {
       headers: { 'content-type': 'text/plain' },
     };
 
-    const result = processData(options);
+    const result = PROCESS_DATA(options);
 
     expect(result).toEqual(options.data);
   });
@@ -30,7 +30,7 @@ describe('processData', () => {
       headers: {},
     };
 
-    const result = processData(options);
+    const result = PROCESS_DATA(options);
 
     expect(result).toEqual(options.data);
   });
@@ -41,7 +41,7 @@ describe('processData', () => {
       headers: { 'content-type': 'application/json' },
     };
 
-    const result = processData(options);
+    const result = PROCESS_DATA(options);
 
     expect(result).toEqual(options.data);
   });

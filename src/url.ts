@@ -19,7 +19,7 @@ const getQueryParam = (
     {},
   );
 
-export const processURL = (
+export const PROCESS_URL = (
   url: string,
   { param = {}, isEncode = true }: URLOptions = {},
 ): string => {
