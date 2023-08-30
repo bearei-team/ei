@@ -1,6 +1,6 @@
-# Fetch
+# Ei
 
-Provide some utility wrappers for fetch
+A lightweight fetch API library
 
 ## Installation
 
@@ -11,7 +11,7 @@ Provide some utility wrappers for fetch
 ## Use
 
 ```typescript
-import ei from '@bearei/ei';
+import { ei } from '@bearei/ei';
 
 await ei('https://bearei.com').then(result =>
   console.info(result);
