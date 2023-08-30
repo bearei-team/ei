@@ -15,17 +15,15 @@ const createHeadersObject = <T extends Headers>(
     : headers;
 
 const mergeHeaders = (
-  defaultHeaders: Record<string, string>,
-  customHeaders: Record<string, string>,
-): Record<string, string> => ({
+  defaultHeaders: Headers,
+  customHeaders: Headers,
+): Headers => ({
   ...defaultHeaders,
   ...customHeaders,
 });
 
-const removeContentType = (
-  headers: Record<string, string>,
-): Record<string, string> => {
-  if (headers['content-type']?.startsWith('multipart/form-data')) {
+const removeContentType = (headers: Headers): Headers => {
+  if (headers?.['content-type']?.startsWith('multipart/form-data')) {
     const omittedHeaders = OMIT(headers, ['content-type']);
 
     return omittedHeaders;
@@ -39,9 +37,7 @@ const defaultHeaders: Record<string, string> = {
   accept: '*/*',
 };
 
-export const PROCESS_HEADERS = (
-  options: Headers = {},
-): Record<string, string> => {
+export const PROCESS_HEADERS = (options: Headers = {}): Headers => {
   const headers = globalOption.get('headers');
   const globalHeaders = createHeadersObject(headers);
   const newHeaders = createHeadersObject(options);

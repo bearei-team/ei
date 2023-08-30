@@ -1,16 +1,13 @@
 import type { FetchOptions, FetchResponse } from '@/core';
 
-export type ContentType = 'json' | 'text' | 'octetStream' | 'file';
-export interface CreateProcessResponseOptions
-  extends Omit<FetchOptions, 'headers'> {
-  /**
-   * Custom request headers
-   */
-  headers?: Record<string, string>;
+export enum Content {
+  JSON = 'json',
+  TEXT = 'text',
+  OCTET_STREAM = 'octetStream',
+  FILE = 'file',
 }
 
-export interface RequestResponse
-  extends Pick<CreateProcessResponseOptions, 'headers'> {
+export interface RequestResponse extends Pick<FetchOptions, 'headers'> {
   /**
    * Response HTTP status code
    */
@@ -31,14 +28,11 @@ export interface ProcessResponseDataOptions extends RequestResponse {
   options: FetchOptions;
 }
 
-const parseFunctionMap: Record<
-  ContentType,
-  (response: Response) => Promise<unknown>
-> = {
-  json: (response: Response): Promise<unknown> => response.json(),
-  text: (response: Response): Promise<string> => response.text(),
-  file: (response: Response): Promise<Blob> => response.blob(),
-  octetStream: async (response: Response): Promise<unknown> => {
+const parseFunctionMap = {
+  [Content.JSON]: (response: Response): Promise<unknown> => response.json(),
+  [Content.TEXT]: (response: Response): Promise<string> => response.text(),
+  [Content.FILE]: (response: Response): Promise<Blob> => response.blob(),
+  [Content.OCTET_STREAM]: async (response: Response): Promise<unknown> => {
     const body = await response.text();
 
     try {
@@ -49,26 +43,27 @@ const parseFunctionMap: Record<
   },
 };
 
-const contentTypeMap: Record<string, ContentType> = {
-  'application/json': 'json',
-  'application/octet-stream': 'octetStream',
-  'text/html': 'text',
-  'text/plain': 'text',
-  'application/vnd.ms-excel': 'file',
+const contentTypeMap: Record<string, keyof typeof Content> = {
+  'application/json': 'JSON',
+  'application/octet-stream': 'OCTET_STREAM',
+  'text/html': 'TEXT',
+  'text/plain': 'TEXT',
+  'application/vnd.ms-excel': 'FILE',
 };
 
-const processResponseData = async (
-  response: Response,
-  type: ContentType,
-  options: ProcessResponseDataOptions,
-): Promise<FetchResponse> => {
-  const data = await parseFunctionMap[type](response);
-  const result = { ...options, data };
+const createProcessResponseData =
+  (options: ProcessResponseDataOptions) =>
+  async (
+    type: keyof typeof Content,
+    response: Response,
+  ): Promise<FetchResponse> => {
+    const data = await parseFunctionMap[Content[type]](response);
+    const result = { ...options, data };
 
-  return response.ok
-    ? result
-    : Promise.reject({ ...result, name: 'HTTPError' });
-};
+    return response.ok
+      ? result
+      : Promise.reject({ ...result, name: 'HTTPError' });
+  };
 
 const extractHeaders = (response: Response): Record<string, string> =>
   [...response.headers.entries()].reduce(
@@ -76,27 +71,28 @@ const extractHeaders = (response: Response): Record<string, string> =>
     {},
   );
 
-const getContentType = (contentType?: string): ContentType => {
+const getContentType = (contentType?: string): keyof typeof Content => {
   const contentTypeKey = Object.keys(contentTypeMap).find(key =>
     contentType?.startsWith(key),
   );
 
-  return contentTypeKey ? contentTypeMap[contentTypeKey] : 'text';
+  return contentTypeKey ? contentTypeMap[contentTypeKey] : 'TEXT';
 };
 
 export const CREATE_PROCESS_RESPONSE =
-  (options: CreateProcessResponseOptions) =>
+  (options: FetchOptions) =>
   async (response: Response): Promise<FetchResponse> => {
     const { status, statusText, url } = response;
     const headers = extractHeaders(response);
     const contentType = headers['content-type'];
     const type = getContentType(contentType);
-
-    return processResponseData(response, type, {
+    const processResponseData = createProcessResponseData({
       status,
       statusText,
       headers,
       url,
       options,
     });
+
+    return processResponseData(type, response);
   };

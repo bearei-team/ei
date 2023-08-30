@@ -1,11 +1,6 @@
 import type { DataType, FetchOptions } from '@/core';
 
-export interface ProcessDataOptions extends Pick<FetchOptions, 'data'> {
-  /**
-   * Custom request headers
-   */
-  headers: Record<string, string>;
-}
+export type ProcessDataOptions = Pick<FetchOptions, 'data' | 'headers'>;
 
 const isJSONContent = (
   data: DataType,
@@ -19,6 +14,6 @@ export const PROCESS_DATA = ({
   data,
   headers,
 }: ProcessDataOptions): BodyInit | null =>
-  (isJSONContent(data, headers['content-type'])
+  (isJSONContent(data, headers?.['content-type'])
     ? JSON.stringify(data)
     : data) as BodyInit;
