@@ -1,11 +1,12 @@
 import { PROCESS_DATA } from './data';
-import { CREATE_PROCESS_ERROR } from './error';
+import { CREATE_PROCESS_ERROR } from './errors/error';
+import { ResponseError } from './errors/responseError';
 import { PROCESS_HEADERS } from './headers';
 import * as globalOptions from './options';
 import { CREATE_PROCESS_RESPONSE } from './response';
 import { PROCESS_URL } from './url';
 
-export type DataType = RequestInit['body'] | Record<string, unknown>;
+export type Data = RequestInit['body'] | Record<string, unknown>;
 export interface FetchOptions extends Omit<RequestInit, 'headers'> {
   /**
    * HTTP request method
@@ -35,7 +36,7 @@ export interface FetchOptions extends Omit<RequestInit, 'headers'> {
   /**
    * The data to be sent as the request body
    */
-  data?: DataType;
+  data?: Data;
 
   /**
    * Whether to encode URL parameters. The default value is true
@@ -45,10 +46,10 @@ export interface FetchOptions extends Omit<RequestInit, 'headers'> {
   /**
    * Custom request headers
    */
-  headers?: Record<string, string>;
+  headers?: Record<string, string> | [string, string][];
 }
 
-export interface FetchResponse {
+export interface FetchResponse extends Pick<FetchOptions, 'headers'> {
   options: FetchOptions;
 
   /**
@@ -70,11 +71,8 @@ export interface FetchResponse {
    * URL of the initiated request
    */
   url: string;
-
-  /**
-   * Request headers of the initiated request
-   */
-  headers?: Record<string, string>;
+  request: Request;
+  response: Response;
 }
 
 export interface CreatedFetch {
@@ -90,7 +88,7 @@ const createFetch = (): CreatedFetch => {
   const createFetchOptions = (
     url: string,
     {
-      url: requestURL,
+      url: fetchURL,
       method = 'GET',
       param,
       timeout,
@@ -101,38 +99,49 @@ const createFetch = (): CreatedFetch => {
     }: FetchOptions = {},
   ): FetchOptions => {
     const processedHeaders = PROCESS_HEADERS(headers);
-    const processedData = PROCESS_DATA({ data, headers: processedHeaders });
-    const processedURL = PROCESS_URL(url ?? requestURL, {
-      param,
-      isEncode,
+    const processedData = PROCESS_DATA({
+      data,
+      contentType: processedHeaders['content-type'],
     });
 
+    const processedURL = PROCESS_URL(url ?? fetchURL, { param, isEncode });
     const fetchTimeout = timeout ?? globalOptions.get('timeout') ?? 3000;
 
     return {
       method,
       headers: processedHeaders,
-      body: processedData,
+      body: processedData as BodyInit,
       url: processedURL,
       timeout: fetchTimeout,
       ...args,
     };
   };
 
-  const performFetch = (options: FetchOptions): Promise<FetchResponse> => {
+  const performFetch = async (
+    options: FetchOptions,
+  ): Promise<FetchResponse> => {
     const abort = new AbortController();
     const signal = abort.signal;
     const timer = setTimeout(() => abort.abort(), options.timeout);
-    const processResponse = CREATE_PROCESS_RESPONSE(options);
-    const processError = CREATE_PROCESS_ERROR(options);
+    const request = new Request(options.url!, { signal, ...options });
+    const processResponse = CREATE_PROCESS_RESPONSE({ request, ...options });
     const processFinally = (): void => {
       timer.unref?.();
       clearTimeout(timer);
     };
 
-    return fetch(options.url!, { signal, ...options })
+    return fetch(request)
       .then(processResponse)
-      .catch(processError)
+      .catch((error: ResponseError) => {
+        const { response, options } = error;
+        const processError = CREATE_PROCESS_ERROR({
+          request,
+          response,
+          options,
+        });
+
+        return processError(error);
+      })
       .finally(processFinally);
   };
 
@@ -140,9 +149,9 @@ const createFetch = (): CreatedFetch => {
     url: string,
     options: FetchOptions = {},
   ): Promise<FetchResponse> => {
-    const createdFetchOptions = createFetchOptions(url, options);
+    const fetchOptions = createFetchOptions(url, options);
 
-    return performFetch(createdFetchOptions);
+    return performFetch(fetchOptions);
   };
 
   createdFetch.options = globalOptions;

@@ -5,7 +5,6 @@ export type Options = Partial<
 >;
 
 const optionsMap = new Map<string, unknown>();
-
 const clear = (): void => optionsMap.clear();
 const set = <K extends keyof Options>(key: K, value: Options[K]): void => {
   optionsMap.set(key, value);

@@ -1,13 +1,14 @@
 import type { FetchOptions, FetchResponse } from '@/core';
+import { ResponseError } from './errors/responseError';
 
-export enum Content {
-  JSON = 'json',
-  TEXT = 'text',
-  OCTET_STREAM = 'octetStream',
-  FILE = 'file',
-}
+export type CreateProcessResponseOptions = Pick<FetchResponse, 'request'> &
+  FetchOptions;
 
-export interface RequestResponse extends Pick<FetchOptions, 'headers'> {
+export interface ProcessResponseDataOptions
+  extends Pick<FetchOptions, 'headers'>,
+    Pick<FetchResponse, 'request'> {
+  options: FetchOptions;
+
   /**
    * Response HTTP status code
    */
@@ -24,31 +25,20 @@ export interface RequestResponse extends Pick<FetchOptions, 'headers'> {
   url: string;
 }
 
-export interface ProcessResponseDataOptions extends RequestResponse {
-  options: FetchOptions;
+export enum Content {
+  JSON = 'json',
+  TEXT = 'text',
 }
 
 const parseFunctionMap = {
   [Content.JSON]: (response: Response): Promise<unknown> => response.json(),
   [Content.TEXT]: (response: Response): Promise<string> => response.text(),
-  [Content.FILE]: (response: Response): Promise<Blob> => response.blob(),
-  [Content.OCTET_STREAM]: async (response: Response): Promise<unknown> => {
-    const body = await response.text();
-
-    try {
-      return JSON.parse(body);
-    } catch (error) {
-      return body;
-    }
-  },
 };
 
 const contentTypeMap: Record<string, keyof typeof Content> = {
   'application/json': 'JSON',
-  'application/octet-stream': 'OCTET_STREAM',
   'text/html': 'TEXT',
   'text/plain': 'TEXT',
-  'application/vnd.ms-excel': 'FILE',
 };
 
 const createProcessResponseData =
@@ -58,11 +48,11 @@ const createProcessResponseData =
     response: Response,
   ): Promise<FetchResponse> => {
     const data = await parseFunctionMap[Content[type]](response);
-    const result = { ...options, data };
+    const processedResponse = { ...options, data, response };
 
     return response.ok
-      ? result
-      : Promise.reject({ ...result, name: 'HTTPError' });
+      ? processedResponse
+      : Promise.reject(new ResponseError({ response, options }));
   };
 
 const extractHeaders = (response: Response): Record<string, string> =>
@@ -80,18 +70,19 @@ const getContentType = (contentType?: string): keyof typeof Content => {
 };
 
 export const CREATE_PROCESS_RESPONSE =
-  (options: FetchOptions) =>
+  ({ request, ...args }: CreateProcessResponseOptions) =>
   async (response: Response): Promise<FetchResponse> => {
     const { status, statusText, url } = response;
     const headers = extractHeaders(response);
     const contentType = headers['content-type'];
     const type = getContentType(contentType);
     const processResponseData = createProcessResponseData({
+      request,
       status,
       statusText,
       headers,
       url,
-      options,
+      options: args,
     });
 
     return processResponseData(type, response);

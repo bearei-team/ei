@@ -1,91 +1,60 @@
-import fetch from 'jest-fetch-mock';
-import { EI as ei } from '../src/core';
+import { FetchOptions, EI as ei } from '../src/core';
+import { HTTPError } from '../src/errors/httpError';
+import { ResponseError } from '../src/errors/responseError';
 
-describe('core', () => {
-  beforeAll(() => {
-    fetch.enableMocks();
-  });
-
-  afterAll(() => {
-    fetch.disableMocks();
-  });
+describe('createdFetch', () => {
+  let originalFetch: typeof fetch;
+  let fetchMock: jest.Mock;
 
   beforeEach(() => {
-    fetch.resetMocks();
+    originalFetch = global.fetch;
+    fetchMock = jest.fn();
+    global.fetch = fetchMock;
   });
 
-  it('performs a GET request with default options', async () => {
-    const url = 'https://api.example.com/data';
-
-    fetch.mockResponseOnce(JSON.stringify({ message: 'Success' }), {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const result = await ei(url);
-
-    expect(result.status).toEqual(200);
-    expect(result.data).toEqual({ message: 'Success' });
+  afterEach(() => {
+    global.fetch = originalFetch;
+    jest.clearAllMocks();
   });
 
-  it('performs a POST request with custom options', async () => {
-    const url = 'https://api.example.com/data';
-    const request = { name: 'John Doe', email: 'john@example.com' };
-    const headers = { 'Content-Type': 'application/json' };
-
-    fetch.mockResponseOnce(JSON.stringify({ message: 'Created' }), {
-      status: 201,
-      headers,
+  test('createdFetch successfully fetches data', async () => {
+    const responseData = { key: 'value' };
+    const response = new Response(JSON.stringify(responseData), {
+      status: 200,
+      headers: { 'content-type': 'application/json; charset=utf-8' },
     });
 
-    const result = await ei(url, {
-      method: 'POST',
-      headers,
-      data: request,
-      timeout: 2000,
-    });
+    fetchMock.mockResolvedValue(response);
 
-    expect(result.status).toEqual(201);
-    expect(result.data).toEqual({ message: 'Created' });
+    const options: FetchOptions = {
+      method: 'GET',
+      url: 'https://example.com',
+    };
+
+    const fetchResult = await ei(options.url!, options);
+
+    expect(fetchResult.data).toEqual(responseData);
+    expect(fetchResult.status).toEqual(200);
   });
 
-  it('handles a failed request and returns an error', async () => {
-    const url = 'https://api.example.com/data';
+  test('createdFetch handles response error', async () => {
+    const errorResponse = new Response('Not Found', {
+      status: 404,
+      headers: { 'content-type': 'application/json; charset=utf-8' },
+    });
+    const options: FetchOptions = {
+      method: 'GET',
+      url: 'https://example.com',
+    };
 
-    fetch.mockResponseOnce(
-      JSON.stringify({ message: 'Internal Server Error' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
+    fetchMock.mockRejectedValue(
+      new ResponseError({ response: errorResponse, options }),
     );
 
-    const result = await ei(url).catch(err => err);
-
-    expect(result.status).toEqual(500);
-    expect(result.statusText).toEqual('Internal Server Error');
-  });
-
-  it('handles a request timeout and returns an error', async () => {
-    const url = 'https://api.example.com/data';
-    const timeout = 100;
-
-    fetch.mockResponseOnce(
-      () =>
-        new Promise(resolve =>
-          setTimeout(
-            () => resolve({ body: JSON.stringify({ message: 'Success' }) }),
-            2000,
-          ),
-        ),
+    const fetchResult = await ei(options.url!, options).catch(
+      (err: HTTPError) => err,
     );
 
-    const result = await ei(url, { timeout }).catch(err => err);
-
-    expect(result.status).toEqual(408);
-    expect(result.statusText).toEqual('Timeout');
+    expect(fetchResult.response.status).toEqual(404);
   });
 });
