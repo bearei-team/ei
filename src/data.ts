@@ -2,7 +2,7 @@ import type { Data, FetchOptions } from '@/core';
 
 export interface ProcessDataOptions extends Pick<FetchOptions, 'data'> {
   /**
-   * Request content type
+   * The content type of the request, for example, "application/json; charset=utf-8".
    */
   contentType?: string;
 }

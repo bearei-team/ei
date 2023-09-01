@@ -15,8 +15,8 @@ export interface FetchOptions extends RequestInit {
   method?: 'GET' | 'HEAD' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 
   /**
-   * The complete URL address for the HTTP request or a request path "/api",
-   * when using the request path as the request URL, the "baseURL" parameter must be set.
+   * The complete URL address for the HTTP request or a request path, for example,
+   * "/api". When using the request path as the request URL, the "baseURL" parameter must be set.
    */
   url?: string;
 
@@ -32,9 +32,9 @@ export interface FetchOptions extends RequestInit {
   param?: Record<string, number | string>;
 
   /**
-   * The base URL for the HTTP request. When using the path "/api" as the URL,
+   * The base URL for the HTTP request. When using a path, such as "/api," as the URL,
    * it will automatically combine with this base URL to form the complete request URL.
-   * This parameter will be ignored when using a complete URL in the request.
+   * This parameter will be ignored when using a complete URL in the request
    */
   baseURL?: string;
 
