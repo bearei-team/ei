@@ -1,4 +1,4 @@
-import { PROCESS_URL } from '../src/url'; // 请替换为您的文件路径
+import { PROCESS_URL } from '../src/url';
 
 describe('PROCESS_URL', () => {
   test('It should process a simple URL without params', () => {
@@ -27,6 +27,7 @@ describe('PROCESS_URL', () => {
       param1: 'value with spaces',
       param2: 42,
     };
+
     const expectedURL = `${url}?param1=value%20with%20spaces&param2=42`;
     const result = PROCESS_URL(url, { param });
 
@@ -39,6 +40,7 @@ describe('PROCESS_URL', () => {
       param1: 'value with spaces',
       param2: 42,
     };
+
     const expectedURL = `${url}?param1=value with spaces&param2=42`;
     const result = PROCESS_URL(url, { param: params, isEncode: false });
 
@@ -51,6 +53,7 @@ describe('PROCESS_URL', () => {
       param1: 'value1',
       param2: 'value2',
     };
+
     const expectedURL = `${url}&param1=value1&param2=value2`;
     const result = PROCESS_URL(url, { param: params });
 

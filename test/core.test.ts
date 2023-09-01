@@ -1,4 +1,4 @@
-import { EI, FetchOptions } from '../src/core'; // 请替换为您的文件路径
+import { EI, FetchOptions } from '../src/core';
 import { ResponseError } from '../src/errors/responseError';
 
 describe('EI', () => {

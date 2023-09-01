@@ -1,7 +1,9 @@
 import { HTTPError, HTTPErrorOptions } from './httpError';
+import { ResponseErrorOptions } from './responseError';
 import { TimeoutError } from './timeoutError';
 
-export type CreateProcessErrorOptions = HTTPErrorOptions;
+export type CreateProcessErrorOptions = Omit<HTTPErrorOptions, 'response'> &
+  Partial<Omit<ResponseErrorOptions, 'options'>>;
 
 const enrichError = (
   error: Error,
@@ -9,7 +11,7 @@ const enrichError = (
 ) =>
   error?.name === 'AbortError'
     ? new TimeoutError(request)
-    : new HTTPError({ response, request, options });
+    : new HTTPError({ response: response!, request, options });
 
 export const CREATE_PROCESS_ERROR =
   (options: CreateProcessErrorOptions) =>

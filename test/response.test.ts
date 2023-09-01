@@ -12,7 +12,6 @@ describe('CREATE_PROCESS_RESPONSE', () => {
     });
 
     const createResponse = CREATE_PROCESS_RESPONSE({ request });
-
     const result = await createResponse(response);
 
     expect(result.status).toBe(200);
