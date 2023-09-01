@@ -7,46 +7,46 @@ import { CREATE_PROCESS_RESPONSE } from './response';
 import { PROCESS_URL } from './url';
 
 export type Data = RequestInit['body'] | Record<string, unknown>;
-export interface FetchOptions extends Omit<RequestInit, 'headers'> {
+export interface FetchOptions extends RequestInit {
   /**
-   * HTTP request method
+   * HTTP request methods supported include 'GET' | 'HEAD' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS',
+   * with the default being 'GET' request.
    */
   method?: 'GET' | 'HEAD' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 
   /**
-   * The server URL to use for the request
+   * The complete URL address for the HTTP request or a request path "/api",
+   * when using the request path as the request URL, the "baseURL" parameter must be set.
    */
   url?: string;
 
   /**
-   * Specifies the number of milliseconds to timeout the request. The default value is 3000ms
+   * HTTP request timeout duration, measured in milliseconds. The default timeout is 3000 milliseconds.
    */
   timeout?: number;
 
   /**
-   * URL parameters sent with the request, must be a simple object or a URLSearchParams object
+   * HTTP request query parameters. These parameters will be merged with the query parameters on the URL,
+   * and if a parameter with the same key as the URL exists, it will override that parameter.
    */
   param?: Record<string, number | string>;
 
   /**
-   * Will be automatically prepended to `url`, except `url` is an absolute URL
+   * The base URL for the HTTP request. When using the path "/api" as the URL,
+   * it will automatically combine with this base URL to form the complete request URL.
+   * This parameter will be ignored when using a complete URL in the request.
    */
-  baseUrl?: string;
+  baseURL?: string;
 
   /**
-   * The data to be sent as the request body
+   * The body of the HTTP request, which can be a BodyInit object, null, or an object.
    */
   data?: Data;
 
   /**
-   * Whether to encode URL parameters. The default value is true
+   * Whether to encode URL query parameters, default is true.
    */
   isEncode?: boolean;
-
-  /**
-   * Custom request headers
-   */
-  headers?: Record<string, string> | [string, string][];
 }
 
 export interface FetchResponse extends Pick<FetchOptions, 'headers'> {
@@ -75,16 +75,16 @@ export interface FetchResponse extends Pick<FetchOptions, 'headers'> {
   response: Response;
 }
 
-export interface CreatedFetch {
+export interface EIFetch {
   (url: string, options?: FetchOptions): Promise<FetchResponse>;
 
   /**
-   * Global options
+   * Global options.
    */
   options: typeof globalOptions;
 }
 
-const createFetch = (): CreatedFetch => {
+const createFetch = (): EIFetch => {
   const createFetchOptions = (
     url: string,
     {
@@ -94,13 +94,14 @@ const createFetch = (): CreatedFetch => {
       timeout,
       headers,
       data,
+      body,
       isEncode,
       ...args
     }: FetchOptions = {},
   ): FetchOptions => {
     const processedHeaders = PROCESS_HEADERS(headers);
     const processedData = PROCESS_DATA({
-      data,
+      data: data ?? body,
       contentType: processedHeaders['content-type'],
     });
 
@@ -134,13 +135,12 @@ const createFetch = (): CreatedFetch => {
       .then(processResponse)
       .catch((error: ResponseError) => {
         const { response, options } = error;
-        const processError = CREATE_PROCESS_ERROR({
+
+        return CREATE_PROCESS_ERROR({
           request,
           response,
           options,
-        });
-
-        return processError(error);
+        })(error);
       })
       .finally(processFinally);
   };

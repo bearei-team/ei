@@ -5,7 +5,7 @@ export type URLOptions = Partial<Pick<FetchOptions, 'param' | 'isEncode'>>;
 
 const processFullURL = (url: string): URL => {
   if (!RegExp(/^(http|https):\/\//).exec(url)) {
-    url = `${globalOption.get('baseUrl')}${url}`;
+    url = `${globalOption.get('baseURL')}${url}`;
   }
 
   return new URL(url);

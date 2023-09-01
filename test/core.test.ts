@@ -1,27 +1,28 @@
-import { FetchOptions, EI as ei } from '../src/core';
-import { HTTPError } from '../src/errors/httpError';
+import { EI, FetchOptions } from '../src/core'; // 请替换为您的文件路径
 import { ResponseError } from '../src/errors/responseError';
 
-describe('createdFetch', () => {
+describe('EI', () => {
   let originalFetch: typeof fetch;
   let fetchMock: jest.Mock;
 
   beforeEach(() => {
-    originalFetch = global.fetch;
+    originalFetch = globalThis.fetch;
     fetchMock = jest.fn();
-    global.fetch = fetchMock;
+    globalThis.fetch = fetchMock;
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
     jest.clearAllMocks();
   });
 
-  test('createdFetch successfully fetches data', async () => {
+  test('EI successfully fetches data', async () => {
     const responseData = { key: 'value' };
     const response = new Response(JSON.stringify(responseData), {
       status: 200,
-      headers: { 'content-type': 'application/json; charset=utf-8' },
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+      },
     });
 
     fetchMock.mockResolvedValue(response);
@@ -31,17 +32,13 @@ describe('createdFetch', () => {
       url: 'https://example.com',
     };
 
-    const fetchResult = await ei(options.url!, options);
-
+    const fetchResult = await EI(options.url!, options);
     expect(fetchResult.data).toEqual(responseData);
     expect(fetchResult.status).toEqual(200);
   });
 
-  test('createdFetch handles response error', async () => {
-    const errorResponse = new Response('Not Found', {
-      status: 404,
-      headers: { 'content-type': 'application/json; charset=utf-8' },
-    });
+  test('EI handles response error', async () => {
+    const errorResponse = new Response('Not Found', { status: 404 });
     const options: FetchOptions = {
       method: 'GET',
       url: 'https://example.com',
@@ -51,8 +48,8 @@ describe('createdFetch', () => {
       new ResponseError({ response: errorResponse, options }),
     );
 
-    const fetchResult = await ei(options.url!, options).catch(
-      (err: HTTPError) => err,
+    const fetchResult = await EI(options.url!, options).catch(
+      (error: ResponseError) => error,
     );
 
     expect(fetchResult.response.status).toEqual(404);

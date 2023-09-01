@@ -1,7 +1,7 @@
 import type { FetchOptions } from '@/core';
 
 export type Options = Partial<
-  Pick<FetchOptions, 'headers' | 'timeout' | 'baseUrl'>
+  Pick<FetchOptions, 'headers' | 'timeout' | 'baseURL'>
 >;
 
 const optionsMap = new Map<string, unknown>();
