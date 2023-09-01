@@ -84,79 +84,77 @@ export interface EIFetch {
   options: typeof globalOptions;
 }
 
+const processFetchOptions = (
+  url: string,
+  {
+    url: fetchURL,
+    method = 'GET',
+    param,
+    timeout,
+    headers,
+    data,
+    body,
+    isEncode,
+    ...args
+  }: FetchOptions = {},
+): FetchOptions => {
+  const processedHeaders = PROCESS_HEADERS(headers);
+  const processedData = PROCESS_DATA({
+    data: data ?? body,
+    contentType: processedHeaders['content-type'],
+  });
+
+  const processedURL = PROCESS_URL(url ?? fetchURL, { param, isEncode });
+  const fetchTimeout = timeout ?? globalOptions.get('timeout') ?? 3000;
+
+  return {
+    method,
+    headers: processedHeaders,
+    body: processedData as BodyInit,
+    url: processedURL,
+    timeout: fetchTimeout,
+    ...args,
+  };
+};
+
+const performFetch = async (options: FetchOptions): Promise<FetchResponse> => {
+  const abort = new AbortController();
+  const signal = abort.signal;
+  const timer = setTimeout(() => abort.abort(), options.timeout);
+  const request = new Request(options.url!, { signal, ...options });
+  const processResponse = CREATE_PROCESS_RESPONSE({ request, ...options });
+  const processFinally = (): void => {
+    timer.unref?.();
+    clearTimeout(timer);
+  };
+
+  return fetch(request)
+    .then(processResponse)
+    .catch((error: ResponseError) => {
+      const { response, options } = error;
+
+      return CREATE_PROCESS_ERROR({
+        request,
+        response,
+        options,
+      })(error);
+    })
+    .finally(processFinally);
+};
+
 const createFetch = (): EIFetch => {
-  const createFetchOptions = (
-    url: string,
-    {
-      url: fetchURL,
-      method = 'GET',
-      param,
-      timeout,
-      headers,
-      data,
-      body,
-      isEncode,
-      ...args
-    }: FetchOptions = {},
-  ): FetchOptions => {
-    const processedHeaders = PROCESS_HEADERS(headers);
-    const processedData = PROCESS_DATA({
-      data: data ?? body,
-      contentType: processedHeaders['content-type'],
-    });
-
-    const processedURL = PROCESS_URL(url ?? fetchURL, { param, isEncode });
-    const fetchTimeout = timeout ?? globalOptions.get('timeout') ?? 3000;
-
-    return {
-      method,
-      headers: processedHeaders,
-      body: processedData as BodyInit,
-      url: processedURL,
-      timeout: fetchTimeout,
-      ...args,
-    };
-  };
-
-  const performFetch = async (
-    options: FetchOptions,
-  ): Promise<FetchResponse> => {
-    const abort = new AbortController();
-    const signal = abort.signal;
-    const timer = setTimeout(() => abort.abort(), options.timeout);
-    const request = new Request(options.url!, { signal, ...options });
-    const processResponse = CREATE_PROCESS_RESPONSE({ request, ...options });
-    const processFinally = (): void => {
-      timer.unref?.();
-      clearTimeout(timer);
-    };
-
-    return fetch(request)
-      .then(processResponse)
-      .catch((error: ResponseError) => {
-        const { response, options } = error;
-
-        return CREATE_PROCESS_ERROR({
-          request,
-          response,
-          options,
-        })(error);
-      })
-      .finally(processFinally);
-  };
-
-  const createdFetch = (
+  const eiFetch = (
     url: string,
     options: FetchOptions = {},
   ): Promise<FetchResponse> => {
-    const fetchOptions = createFetchOptions(url, options);
+    const fetchOptions = processFetchOptions(url, options);
 
     return performFetch(fetchOptions);
   };
 
-  createdFetch.options = globalOptions;
+  eiFetch.options = globalOptions;
 
-  return createdFetch;
+  return eiFetch;
 };
 
 export const EI = createFetch();
