@@ -1,28 +1,23 @@
 import type { FetchOptions, FetchResponse } from '@/core';
 import { ResponseError } from './errors/responseError';
+import { EXTRACT_HEADERS } from './headers';
 
 export type CreateProcessResponseOptions = Pick<FetchResponse, 'request'> &
   FetchOptions;
 
 export interface ProcessResponseDataOptions
-  extends Pick<FetchOptions, 'headers'>,
-    Pick<FetchResponse, 'request'> {
+  extends Pick<FetchResponse, 'request' | 'url' | 'headers'> {
   options: FetchOptions;
 
   /**
-   * Response HTTP status code
+   * HTTP response status codes.
    */
   status: number;
 
   /**
-   * Response HTTP status code description
+   * HTTP response status code description text.
    */
   statusText: string;
-
-  /**
-   * The server URL to use for the request
-   */
-  url: string;
 }
 
 export enum Content {
@@ -55,12 +50,6 @@ const createProcessResponseData =
       : Promise.reject(new ResponseError({ response, options }));
   };
 
-const extractHeaders = (response: Response): Record<string, string> =>
-  [...response.headers.entries()].reduce(
-    (accumulator, [key, value]) => ({ ...accumulator, [key]: value }),
-    {},
-  );
-
 const getContentType = (contentType?: string): keyof typeof Content => {
   const contentTypeKey = Object.keys(contentTypeMap).find(key =>
     contentType?.startsWith(key),
@@ -73,7 +62,7 @@ export const CREATE_PROCESS_RESPONSE =
   ({ request, ...args }: CreateProcessResponseOptions) =>
   async (response: Response): Promise<FetchResponse> => {
     const { status, statusText, url } = response;
-    const headers = extractHeaders(response);
+    const headers = EXTRACT_HEADERS([...response.headers.entries()]);
     const contentType = headers['content-type'];
     const type = getContentType(contentType);
     const processResponseData = createProcessResponseData({

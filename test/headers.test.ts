@@ -1,6 +1,20 @@
-import { PROCESS_HEADERS } from '../src/headers';
+import { EXTRACT_HEADERS, PROCESS_HEADERS } from '../src/headers';
 
 describe('PROCESS_HEADERS', () => {
+  test('EXTRACT_HEADERS should convert headers array to object', () => {
+    const headersArray: [string, string][] = [
+      ['Content-Type', 'application/json'],
+      ['Authorization', 'Bearer token'],
+    ];
+
+    const headersObject = EXTRACT_HEADERS(headersArray);
+
+    expect(headersObject).toEqual({
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer token',
+    });
+  });
+
   test('It should merge default headers and global headers', () => {
     const defaultHeaders = {
       'content-type': 'application/json; charset=utf-8',

@@ -6,6 +6,7 @@ import * as globalOptions from './options';
 import { CREATE_PROCESS_RESPONSE } from './response';
 import { PROCESS_URL } from './url';
 
+export type SearchType = number | string | boolean;
 export type Data = RequestInit['body'] | Record<string, unknown>;
 export interface FetchOptions extends RequestInit {
   /**
@@ -29,7 +30,7 @@ export interface FetchOptions extends RequestInit {
    * HTTP request query parameters. These parameters will be merged with the query parameters on the URL,
    * and if a parameter with the same key as the URL exists, it will override that parameter.
    */
-  param?: Record<string, number | string>;
+  param?: Record<string, SearchType>;
 
   /**
    * The base URL for the HTTP request. When using a path, such as "/api," as the URL,

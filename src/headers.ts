@@ -6,23 +6,14 @@ const defaultHeaders: Record<string, string> = {
   accept: '*/*',
 };
 
-const convertHeadersToRecord = (
-  headers: [string, string][],
-): Record<string, string> => {
-  return [...headers].reduce(
-    (accumulator, [key, value]) => ({ ...accumulator, [key]: value }),
-    {},
-  );
-};
-
 const createHeadersObject = (
   headers: HeadersInit = {},
 ): Record<string, string> => {
   if (headers instanceof Headers) {
-    return convertHeadersToRecord([...headers.entries()]);
+    return EXTRACT_HEADERS([...headers.entries()]);
   }
 
-  return Array.isArray(headers) ? convertHeadersToRecord(headers) : headers;
+  return Array.isArray(headers) ? EXTRACT_HEADERS(headers) : headers;
 };
 
 const mergeHeaders = <T extends Record<string, string>>(
@@ -41,6 +32,15 @@ const removeContentType = <T extends Record<string, string>>(headers: T): T => {
   }
 
   return headers;
+};
+
+export const EXTRACT_HEADERS = (
+  headers: [string, string][],
+): Record<string, string> => {
+  return [...headers].reduce(
+    (accumulator, [key, value]) => ({ ...accumulator, [key]: value }),
+    {},
+  );
 };
 
 export const PROCESS_HEADERS = (
