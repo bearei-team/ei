@@ -65,7 +65,7 @@ const createProcessError =
     throw enrichError(error, {
       request,
       options: args,
-      url: args.url!,
+      url: args.url,
     });
   };
 
