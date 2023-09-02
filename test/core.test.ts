@@ -16,10 +16,9 @@ describe('core', () => {
 
     const options: FetchOptions = {
       method: 'GET',
-      url: 'https://example.com',
     };
 
-    const fetchResult = await EI(options.url!, options);
+    const fetchResult = await EI('https://example.com', options);
 
     expect(fetchResult.data).toEqual(responseData);
     expect(fetchResult.status).toEqual(200);
@@ -33,10 +32,9 @@ describe('core', () => {
 
     const options: FetchOptions = {
       method: 'GET',
-      url: 'https://example.com',
     };
 
-    const fetchResult = await EI(options.url!, options).catch(
+    const fetchResult = await EI('https://example.com', options).catch(
       (err: Err) => err,
     );
 
@@ -49,10 +47,9 @@ describe('core', () => {
 
     const options: FetchOptions = {
       method: 'GET',
-      url: 'https://example.com',
     };
 
-    const fetchResult = await EI(options.url!, options).catch(
+    const fetchResult = await EI('https://example.com', options).catch(
       (err: Err) => err,
     );
 

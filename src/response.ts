@@ -1,9 +1,9 @@
-import type { FetchOptions, FetchResponse } from '@/core';
+import type { FetchResponse, ProcessedFetchOptions } from '@/core';
 import { ERROR } from './error';
 import { HEADERS } from './headers';
 
 export type CreateProcessResponseOptions = Pick<FetchResponse, 'request'> &
-  FetchOptions;
+  ProcessedFetchOptions;
 
 export type ProcessResponseDataOptions = Omit<
   FetchResponse,
