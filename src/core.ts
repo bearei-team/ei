@@ -108,6 +108,7 @@ const processFetchOptions = (
     ...args
   }: FetchOptions = {},
 ): ProcessedFetchOptions => {
+  const fetchTimeout = timeout ?? optionsStore.get('timeout') ?? 3000;
   const processedHeaders = processHeaders(headers);
   const processedData = processData({
     data: data ?? body,
@@ -118,8 +119,6 @@ const processFetchOptions = (
     param,
     isEncode,
   });
-
-  const fetchTimeout = timeout ?? optionsStore.get('timeout') ?? 3000;
 
   return {
     method,

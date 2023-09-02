@@ -4,7 +4,8 @@ const { createProcessResponse } = RESPONSE;
 
 describe('response', () => {
   test('It should create a successful FetchResponse', async () => {
-    const request = new Request('https://example.com/api');
+    const url = 'https://example.com/api';
+    const request = new Request(url);
     const response = new Response('{"data": "example"}', {
       status: 200,
       statusText: 'OK',
@@ -12,7 +13,7 @@ describe('response', () => {
         'Content-Type': 'application/json',
       },
     });
-    const createResponse = createProcessResponse({ request });
+    const createResponse = createProcessResponse({ request, url });
     const result = await createResponse(response);
 
     expect(result.status).toBe(200);
@@ -21,13 +22,14 @@ describe('response', () => {
   });
 
   test('It should reject with ResponseError on non-OK response', async () => {
-    const request = new Request('https://example.com/api');
+    const url = 'https://example.com/api';
+    const request = new Request(url);
     const response = new Response('Not Found', {
       status: 404,
       statusText: 'Not Found',
     });
 
-    const createResponse = createProcessResponse({ request });
+    const createResponse = createProcessResponse({ request, url });
     await expect(createResponse(response)).rejects.toThrowError(
       'Request response failed',
     );
