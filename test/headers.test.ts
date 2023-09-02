@@ -1,13 +1,14 @@
-import { EXTRACT_HEADERS, PROCESS_HEADERS } from '../src/headers';
+import { HEADERS } from '../src/headers';
 
-describe('PROCESS_HEADERS', () => {
-  test('EXTRACT_HEADERS should convert headers array to object', () => {
+describe('headers', () => {
+  test('It should convert the headers array to an object', () => {
+    const { extractHeaders } = HEADERS;
     const headersArray: [string, string][] = [
       ['Content-Type', 'application/json'],
       ['Authorization', 'Bearer token'],
     ];
 
-    const headersObject = EXTRACT_HEADERS(headersArray);
+    const headersObject = extractHeaders(headersArray);
 
     expect(headersObject).toEqual({
       'Content-Type': 'application/json',
@@ -16,16 +17,18 @@ describe('PROCESS_HEADERS', () => {
   });
 
   test('It should merge default headers and global headers', () => {
+    const { processHeaders } = HEADERS;
     const defaultHeaders = {
       'content-type': 'application/json; charset=utf-8',
       accept: '*/*',
     };
 
-    const result = PROCESS_HEADERS();
+    const result = processHeaders();
     expect(result).toEqual(expect.objectContaining(defaultHeaders));
   });
 
   test('It should merge default headers and new headers', () => {
+    const { processHeaders } = HEADERS;
     const newHeaders = {
       'content-type': 'application/xml',
       'custom-header': 'custom-value',
@@ -33,12 +36,13 @@ describe('PROCESS_HEADERS', () => {
     };
 
     const headers = new Headers(newHeaders);
-    const result = PROCESS_HEADERS(headers);
+    const result = processHeaders(headers);
 
     expect(result).toEqual(expect.objectContaining(newHeaders));
   });
 
   test('It should remove "content-type" header if starts with "multipart/form-data"', () => {
+    const { processHeaders } = HEADERS;
     const headers: [string, string][] = [
       [
         'content-type',
@@ -46,8 +50,7 @@ describe('PROCESS_HEADERS', () => {
       ],
     ];
 
-    const result = PROCESS_HEADERS(headers);
-
+    const result = processHeaders(headers);
     expect(result).not.toHaveProperty('content-type');
   });
 });

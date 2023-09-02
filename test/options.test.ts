@@ -1,10 +1,11 @@
-import { clear, get, set } from '../src/options';
+import { OPTIONS_STORE } from '../src/optionsStore';
+
+const { clear, get, set } = OPTIONS_STORE;
 
 describe('Options Storage', () => {
   afterEach(() => {
     clear();
   });
-
   test('It should set and get a value', () => {
     set('headers', { 'Content-Type': 'application/json' });
 
@@ -22,6 +23,7 @@ describe('Options Storage', () => {
   test('It should clear all options', () => {
     set('headers', { 'Content-Type': 'application/json' });
     set('timeout', 5000);
+
     clear();
 
     const headers = get('headers');

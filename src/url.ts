@@ -1,11 +1,15 @@
 import type { FetchOptions, SearchType } from '@/core';
-import * as globalOption from './options';
+import { OPTIONS_STORE } from './optionsStore';
 
 export type URLOptions = Partial<Pick<FetchOptions, 'param' | 'isEncode'>>;
+export interface CreatedURL {
+  processURL: typeof processURL;
+}
 
+const optionsStore = OPTIONS_STORE;
 const processFullURL = (url: string): URL => {
   if (!RegExp(/^(http|https):\/\//).exec(url)) {
-    url = `${globalOption.get('baseURL')}${url}`;
+    url = `${optionsStore.get('baseURL')}${url}`;
   }
 
   return new URL(url);
@@ -35,7 +39,7 @@ const processSearchString = (
     return accumulator;
   }, '');
 
-export const PROCESS_URL = (
+const processURL = (
   url: string,
   { param = {}, isEncode }: URLOptions = {},
 ): string => {
@@ -46,3 +50,9 @@ export const PROCESS_URL = (
 
   return searchString ? `${newURL}?${searchString}` : newURL;
 };
+
+const createResponse = (): CreatedURL => ({
+  processURL,
+});
+
+export const CREATED_URL = createResponse();

@@ -1,9 +1,10 @@
-import { PROCESS_URL } from '../src/url';
+import { CREATED_URL } from '../src/url';
 
-describe('PROCESS_URL', () => {
+const { processURL } = CREATED_URL;
+describe('url', () => {
   test('It should process a simple URL without params', () => {
     const url = 'https://example.com/api';
-    const result = PROCESS_URL(url);
+    const result = processURL(url);
 
     expect(result).toBe(url);
   });
@@ -16,7 +17,7 @@ describe('PROCESS_URL', () => {
     };
 
     const expectedURL = `${url}?param1=value1&param2=value2`;
-    const result = PROCESS_URL(url, { param });
+    const result = processURL(url, { param });
 
     expect(result).toBe(expectedURL);
   });
@@ -29,7 +30,7 @@ describe('PROCESS_URL', () => {
     };
 
     const expectedURL = `${url}?param1=value%20with%20spaces&param2=42`;
-    const result = PROCESS_URL(url, { param });
+    const result = processURL(url, { param });
 
     expect(result).toBe(expectedURL);
   });
@@ -42,7 +43,7 @@ describe('PROCESS_URL', () => {
     };
 
     const expectedURL = `${url}?param1=value with spaces&param2=42`;
-    const result = PROCESS_URL(url, { param: params, isEncode: false });
+    const result = processURL(url, { param: params, isEncode: false });
 
     expect(result).toBe(expectedURL);
   });
@@ -55,7 +56,7 @@ describe('PROCESS_URL', () => {
     };
 
     const expectedURL = `${url}&param1=value1&param2=value2`;
-    const result = PROCESS_URL(url, { param: params });
+    const result = processURL(url, { param: params });
 
     expect(result).toBe(expectedURL);
   });

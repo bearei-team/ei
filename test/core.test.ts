@@ -1,31 +1,18 @@
+import 'jest-fetch-mock';
 import { EI, FetchOptions } from '../src/core';
-import { ResponseError } from '../src/errors/responseError';
+import { Err } from '../src/error';
 
-describe('EI', () => {
-  let originalFetch: typeof fetch;
-  let fetchMock: jest.Mock;
-
+describe('core', () => {
   beforeEach(() => {
-    originalFetch = globalThis.fetch;
-    fetchMock = jest.fn();
-    globalThis.fetch = fetchMock;
+    fetchMock.resetMocks();
   });
 
-  afterEach(() => {
-    globalThis.fetch = originalFetch;
-    jest.clearAllMocks();
-  });
-
-  test('EI successfully fetches data', async () => {
+  test('It should be successful in obtaining EI data', async () => {
     const responseData = { key: 'value' };
-    const response = new Response(JSON.stringify(responseData), {
-      status: 200,
-      headers: {
-        'content-type': 'application/json; charset=utf-8',
-      },
-    });
 
-    fetchMock.mockResolvedValue(response);
+    fetchMock.mockResponseOnce(JSON.stringify({ key: 'value' }), {
+      headers: { 'content-type': 'application/json; charset=utf-8' },
+    });
 
     const options: FetchOptions = {
       method: 'GET',
@@ -33,25 +20,43 @@ describe('EI', () => {
     };
 
     const fetchResult = await EI(options.url!, options);
+
     expect(fetchResult.data).toEqual(responseData);
     expect(fetchResult.status).toEqual(200);
   });
 
-  test('EI handles response error', async () => {
-    const errorResponse = new Response('Not Found', { status: 404 });
+  test('It should be a failure in obtaining EI data', async () => {
+    fetchMock.mockResponseOnce('Not Found', {
+      status: 404,
+      statusText: 'Not Found',
+    });
+
     const options: FetchOptions = {
       method: 'GET',
       url: 'https://example.com',
     };
 
-    fetchMock.mockRejectedValue(
-      new ResponseError({ response: errorResponse, options }),
+    const fetchResult = await EI(options.url!, options).catch(
+      (err: Err) => err,
     );
+
+    expect(fetchResult.data).toEqual('Not Found');
+    expect(fetchResult.status).toEqual(404);
+  });
+
+  test('It should be a timeout in obtaining EI data', async () => {
+    fetchMock.mockAbort();
+
+    const options: FetchOptions = {
+      method: 'GET',
+      url: 'https://example.com',
+    };
 
     const fetchResult = await EI(options.url!, options).catch(
-      (error: ResponseError) => error,
+      (err: Err) => err,
     );
 
-    expect(fetchResult.response.status).toEqual(404);
+    expect(fetchResult.data).toEqual('Request Timeout');
+    expect(fetchResult.status).toEqual(408);
   });
 });

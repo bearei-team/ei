@@ -1,19 +1,20 @@
-import * as globalOption from './options';
+import { OPTIONS_STORE } from './optionsStore';
 import { OMIT } from './utils/omit.utils';
 
-const defaultHeaders: Record<string, string> = {
-  'content-type': 'application/json; charset=utf-8',
-  accept: '*/*',
-};
+export interface CreatedHeaders {
+  extractHeaders: typeof extractHeaders;
+  processHeaders: typeof processHeaders;
+}
 
+const optionsStore = OPTIONS_STORE;
 const createHeadersObject = (
   headers: HeadersInit = {},
 ): Record<string, string> => {
   if (headers instanceof Headers) {
-    return EXTRACT_HEADERS([...headers.entries()]);
+    return extractHeaders([...headers.entries()]);
   }
 
-  return Array.isArray(headers) ? EXTRACT_HEADERS(headers) : headers;
+  return Array.isArray(headers) ? extractHeaders(headers) : headers;
 };
 
 const mergeHeaders = <T extends Record<string, string>>(
@@ -34,7 +35,7 @@ const removeContentType = <T extends Record<string, string>>(headers: T): T => {
   return headers;
 };
 
-export const EXTRACT_HEADERS = (
+const extractHeaders = (
   headers: [string, string][],
 ): Record<string, string> => {
   return [...headers].reduce(
@@ -43,17 +44,27 @@ export const EXTRACT_HEADERS = (
   );
 };
 
-export const PROCESS_HEADERS = (
-  headers: HeadersInit = {},
-): Record<string, string> => {
-  const globalHeaders = globalOption.get('headers');
+const processHeaders = (headers: HeadersInit = {}): Record<string, string> => {
+  const defaultHeaders: Record<string, string> = {
+    'content-type': 'application/json; charset=utf-8',
+    accept: '*/*',
+  };
+
+  const globalHeaders = optionsStore.get('headers');
   const createdGlobalHeaders = createHeadersObject(globalHeaders);
-  const newHeaders = createHeadersObject(headers);
+  const createdHeaders = createHeadersObject(headers);
 
   return removeContentType(
     mergeHeaders(
       mergeHeaders(defaultHeaders, createdGlobalHeaders),
-      newHeaders,
+      createdHeaders,
     ),
   );
 };
+
+const createHeaders = (): CreatedHeaders => ({
+  extractHeaders,
+  processHeaders,
+});
+
+export const HEADERS = createHeaders();

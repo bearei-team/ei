@@ -1,11 +1,8 @@
 export * from './core';
 export * from './data';
-export * from './errors/error';
-export * from './errors/httpError';
-export * from './errors/responseError';
-export * from './errors/timeoutError';
+export * from './error';
 export * from './headers';
-export * from './options';
+export * from './optionsStore';
 export * from './response';
 export * from './url';
 import { EI } from './core';
