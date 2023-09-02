@@ -1,107 +1,35 @@
-import { CREATE_PROCESS_RESPONSE } from '../src/response';
+import { RESPONSE } from '../src/response';
 
-describe('processResponse', () => {
-  it('should process response with successful status', async () => {
-    const options = {};
-    const response = new Response('{"message": "Success"}', {
+const { createProcessResponse } = RESPONSE;
+
+describe('response', () => {
+  test('It should create a successful FetchResponse', async () => {
+    const request = new Request('https://example.com/api');
+    const response = new Response('{"data": "example"}', {
       status: 200,
       statusText: 'OK',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
+    const createResponse = createProcessResponse({ request });
+    const result = await createResponse(response);
 
-    const result = await CREATE_PROCESS_RESPONSE(options)(response);
-
-    expect(result).toEqual({
-      status: 200,
-      statusText: 'OK',
-      headers: { 'content-type': 'application/json' },
-      url: '',
-      options: {},
-      data: { message: 'Success' },
-    });
+    expect(result.status).toBe(200);
+    expect(result.statusText).toBe('OK');
+    expect(result.data).toEqual({ data: 'example' });
   });
 
-  it('should process response with error status', async () => {
-    const options = {};
-    const response = new Response('{"error": "Not Found"}', {
+  test('It should reject with ResponseError on non-OK response', async () => {
+    const request = new Request('https://example.com/api');
+    const response = new Response('Not Found', {
       status: 404,
       statusText: 'Not Found',
-      headers: { 'content-type': 'application/json' },
     });
 
-    await expect(CREATE_PROCESS_RESPONSE(options)(response)).rejects.toEqual({
-      status: 404,
-      statusText: 'Not Found',
-      headers: { 'content-type': 'application/json' },
-      url: '',
-      options: {},
-      data: { error: 'Not Found' },
-      name: 'HTTPError',
-    });
-  });
-
-  it('should process response with JSON content-type', async () => {
-    const options = {};
-    const response = new Response('{"message": "Success"}', {
-      status: 200,
-      statusText: 'OK',
-      headers: { 'content-type': 'application/json' },
-    });
-
-    const result = await CREATE_PROCESS_RESPONSE(options)(response);
-
-    expect(result.data).toEqual({ message: 'Success' });
-  });
-
-  it('should process response with text content-type', async () => {
-    const options = {};
-    const response = new Response('Hello, World!', {
-      status: 200,
-      statusText: 'OK',
-      headers: { 'content-type': 'text/plain' },
-    });
-
-    const result = await CREATE_PROCESS_RESPONSE(options)(response);
-
-    expect(result.data).toEqual('Hello, World!');
-  });
-
-  it('should process response with octet-stream content-type', async () => {
-    const options = {};
-    const response = new Response('{"data": "Binary data"}', {
-      status: 200,
-      statusText: 'OK',
-      headers: { 'content-type': 'application/octet-stream' },
-    });
-
-    const result = await CREATE_PROCESS_RESPONSE(options)(response);
-
-    expect(result.data).toEqual({ data: 'Binary data' });
-  });
-
-  it('should process response with application/vnd.ms-excel content-type', async () => {
-    const options = {};
-    const response = new Response('{"data": "Binary data"}', {
-      status: 200,
-      statusText: 'OK',
-      headers: { 'content-type': 'application/vnd.ms-excel' },
-    });
-
-    const result = await CREATE_PROCESS_RESPONSE(options)(response);
-
-    expect(result.data).toBeInstanceOf(Blob);
-  });
-
-  it('should process response with custom content-type', async () => {
-    const options = {};
-    const response = new Response('<html><body><h1>Hello</h1></body></html>', {
-      status: 200,
-      statusText: 'OK',
-      headers: { 'content-type': 'text/html' },
-    });
-
-    const result = await CREATE_PROCESS_RESPONSE(options)(response);
-
-    expect(result.data).toEqual('<html><body><h1>Hello</h1></body></html>');
+    const createResponse = createProcessResponse({ request });
+    await expect(createResponse(response)).rejects.toThrowError(
+      'Request response failed',
+    );
   });
 });

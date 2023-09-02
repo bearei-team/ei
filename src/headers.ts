@@ -1,48 +1,70 @@
-import type { FetchOptions } from '@/core';
-import * as globalOption from './options';
+import { OPTIONS_STORE } from './optionsStore';
 import { OMIT } from './utils/omit.utils';
 
-export type Headers = FetchOptions['headers'];
+export interface CreatedHeaders {
+  extractHeaders: typeof extractHeaders;
+  processHeaders: typeof processHeaders;
+}
 
-const createHeadersObject = <T extends Headers>(
-  headers: T,
-): Record<string, string> =>
-  Array.isArray(headers)
-    ? headers.reduce(
-        (accumulator, [key, value]) => ({ ...accumulator, [key]: value }),
-        {},
-      )
-    : headers;
+const optionsStore = OPTIONS_STORE;
+const createHeadersObject = (
+  headers: HeadersInit = {},
+): Record<string, string> => {
+  if (headers instanceof Headers) {
+    return extractHeaders([...headers.entries()]);
+  }
 
-const mergeHeaders = (
-  defaultHeaders: Headers,
-  customHeaders: Headers,
-): Headers => ({
+  return Array.isArray(headers) ? extractHeaders(headers) : headers;
+};
+
+const mergeHeaders = <T extends Record<string, string>>(
+  defaultHeaders: T,
+  customHeaders: T,
+): T => ({
   ...defaultHeaders,
   ...customHeaders,
 });
 
-const removeContentType = (headers: Headers): Headers => {
+const removeContentType = <T extends Record<string, string>>(headers: T): T => {
   if (headers?.['content-type']?.startsWith('multipart/form-data')) {
     const omittedHeaders = OMIT(headers, ['content-type']);
 
-    return omittedHeaders;
+    return omittedHeaders as T;
   }
 
   return headers;
 };
 
-const defaultHeaders: Record<string, string> = {
-  'content-type': 'application/json; charset=utf-8',
-  accept: '*/*',
-};
-
-export const PROCESS_HEADERS = (options: Headers = {}): Headers => {
-  const headers = globalOption.get('headers');
-  const globalHeaders = createHeadersObject(headers);
-  const newHeaders = createHeadersObject(options);
-
-  return removeContentType(
-    mergeHeaders(mergeHeaders(defaultHeaders, globalHeaders), newHeaders),
+const extractHeaders = (
+  headers: [string, string][],
+): Record<string, string> => {
+  return [...headers].reduce(
+    (accumulator, [key, value]) => ({ ...accumulator, [key]: value }),
+    {},
   );
 };
+
+const processHeaders = (headers: HeadersInit = {}): Record<string, string> => {
+  const defaultHeaders: Record<string, string> = {
+    'content-type': 'application/json; charset=utf-8',
+    accept: '*/*',
+  };
+
+  const globalHeaders = optionsStore.get('headers');
+  const createdGlobalHeaders = createHeadersObject(globalHeaders);
+  const createdHeaders = createHeadersObject(headers);
+
+  return removeContentType(
+    mergeHeaders(
+      mergeHeaders(defaultHeaders, createdGlobalHeaders),
+      createdHeaders,
+    ),
+  );
+};
+
+const createHeaders = (): CreatedHeaders => ({
+  extractHeaders,
+  processHeaders,
+});
+
+export const HEADERS = createHeaders();

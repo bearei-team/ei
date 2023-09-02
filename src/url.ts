@@ -1,46 +1,58 @@
-import type { FetchOptions } from '@/core';
-import * as globalOption from './options';
+import type { FetchOptions, SearchType } from '@/core';
+import { OPTIONS_STORE } from './optionsStore';
 
 export type URLOptions = Partial<Pick<FetchOptions, 'param' | 'isEncode'>>;
+export interface CreatedURL {
+  processURL: typeof processURL;
+}
 
+const optionsStore = OPTIONS_STORE;
 const processFullURL = (url: string): URL => {
   if (!RegExp(/^(http|https):\/\//).exec(url)) {
-    url = `${globalOption.get('baseUrl')}${url}`;
+    url = `${optionsStore.get('baseURL')}${url}`;
   }
 
   return new URL(url);
 };
 
-const getQueryParam = (
+const getSearchParam = (
   searchParam: URLSearchParams,
 ): Record<string, string | null> =>
   Array.from(searchParam.keys()).reduce<Record<string, string | null>>(
-    (query, key) => ({ ...query, [key]: searchParam.get(key) }),
+    (search, key) => ({ ...search, [key]: searchParam.get(key) }),
     {},
   );
 
-export const PROCESS_URL = (
+const processSearchString = (
+  searchParam: Record<string, SearchType | null>,
+  { isEncode = true }: Pick<URLOptions, 'isEncode'>,
+) =>
+  Object.entries(searchParam).reduce((accumulator, [key, value]) => {
+    if (value || typeof value === 'number') {
+      const encodedValue = isEncode ? encodeURIComponent(value) : value;
+
+      return accumulator
+        ? `${accumulator}&${key}=${encodedValue}`
+        : `${key}=${encodedValue}`;
+    }
+
+    return accumulator;
+  }, '');
+
+const processURL = (
   url: string,
-  { param = {}, isEncode = true }: URLOptions = {},
+  { param = {}, isEncode }: URLOptions = {},
 ): string => {
   const { searchParams, origin, pathname } = processFullURL(url);
   const newURL = `${origin}${pathname !== '/' ? pathname : ''}`;
-  const queryParam = getQueryParam(searchParams);
-  const query = { ...queryParam, ...param };
-  const queryString = Object.entries(query).reduce(
-    (accumulator, [key, value]) => {
-      if (value || typeof value === 'number') {
-        const encodedValue = isEncode ? encodeURIComponent(value) : value;
+  const searchParam = { ...getSearchParam(searchParams), ...param };
+  const searchString = processSearchString(searchParam, { isEncode });
 
-        return accumulator
-          ? `${accumulator}&${key}=${encodedValue}`
-          : `${key}=${encodedValue}`;
-      }
-
-      return accumulator;
-    },
-    '',
-  );
-
-  return queryString ? `${newURL}?${queryString}` : newURL;
+  return searchString ? `${newURL}?${searchString}` : newURL;
 };
+
+const createResponse = (): CreatedURL => ({
+  processURL,
+});
+
+export const CREATED_URL = createResponse();

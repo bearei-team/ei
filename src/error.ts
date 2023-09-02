@@ -1,44 +1,77 @@
-import type { FetchOptions, FetchResponse } from '@/core';
+import { FetchResponse } from './core';
+import {
+  CreateProcessResponseOptions,
+  ProcessResponseDataOptions,
+} from './response';
 
-export interface EnrichedError
-  extends Partial<Pick<FetchResponse, 'options' | 'status' | 'statusText'>> {
-  /**
-   * Error message description
-   */
-  message?: string;
+export type CreateErrOptions = Partial<Omit<FetchResponse, 'request'>> &
+  Pick<FetchResponse, 'request'>;
 
-  /**
-   * Error name
-   */
-  name?: string;
+export type Err = Partial<Error> & CreateErrOptions;
+export type CreateProcessErrorOptions = CreateProcessResponseOptions;
+export type EnrichErrorOptions = Omit<
+  ProcessResponseDataOptions,
+  'status' | 'statusText'
+>;
+
+export interface CreatedError {
+  createProcessError: typeof createProcessError;
+  createResponseError: typeof createResponseError;
 }
 
-const isAborted = (error: Record<string, unknown>): boolean =>
-  (error.type as string)?.toLowerCase() === 'aborted' ||
-  (error.message as string)
-    ?.toLowerCase()
-    .startsWith('the operation was aborted');
+const createErr = (err: Err): Err => Object.assign(new Error(), err);
+const createHTTPError = ({
+  status,
+  statusText = '',
+  ...args
+}: CreateErrOptions): Err => {
+  const code = status || typeof status === 'number' ? status : '';
+  const statusCode = `${code} ${statusText}`.trim();
+  const reason = statusCode ? `status code ${statusCode}` : 'an unknown error';
 
-const enrichError = (
-  error: Record<string, unknown>,
-  options: FetchOptions,
-): EnrichedError => ({
-  ...error,
-  ...(isAborted(error) && {
-    status: 408,
-    statusText: 'Timeout',
-    message: 'Timeout',
-    name: 'TimeoutError',
-  }),
-  options,
+  return createErr({
+    ...args,
+    name: 'HTTPError',
+    message: `Request failed with ${reason}`,
+    status,
+    statusText,
+  });
+};
+
+const createTimeoutError = (options: CreateErrOptions): Err =>
+  createErr({ ...options, name: 'TimeoutError', message: 'TimeoutError' });
+
+const createResponseError = (options: CreateErrOptions): Err =>
+  createErr({
+    ...options,
+    name: 'ResponseError',
+    message: 'Request response failed',
+  });
+
+const enrichError = (err: Err, options: EnrichErrorOptions): Err =>
+  err.name === 'AbortError'
+    ? createTimeoutError({
+        ...err,
+        ...options,
+        status: 408,
+        statusText: 'Request Timeout',
+        data: 'Request Timeout',
+      })
+    : createHTTPError(err);
+
+const createProcessError =
+  ({ request, ...args }: CreateProcessErrorOptions) =>
+  (error: Err): never => {
+    throw enrichError(error, {
+      request,
+      options: args,
+      url: args.url!,
+    });
+  };
+
+const createError = (): CreatedError => ({
+  createProcessError,
+  createResponseError,
 });
 
-export const CREATE_PROCESS_ERROR =
-  (options: FetchOptions) =>
-  (error: unknown): never => {
-    if (typeof error === 'object' && error !== null) {
-      throw enrichError(error as Record<string, unknown>, options);
-    }
-
-    throw error;
-  };
+export const ERROR = createError();

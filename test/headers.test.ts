@@ -1,76 +1,56 @@
-import { PROCESS_HEADERS } from '../src/headers';
-import * as options from '../src/options';
+import { HEADERS } from '../src/headers';
 
-describe('processHeader', () => {
-  beforeEach(() => {
-    jest.spyOn(options, 'get').mockReturnValue(undefined);
+describe('headers', () => {
+  test('It should convert the headers array to an object', () => {
+    const { extractHeaders } = HEADERS;
+    const headersArray: [string, string][] = [
+      ['Content-Type', 'application/json'],
+      ['Authorization', 'Bearer token'],
+    ];
+
+    const headersObject = extractHeaders(headersArray);
+
+    expect(headersObject).toEqual({
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer token',
+    });
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+  test('It should merge default headers and global headers', () => {
+    const { processHeaders } = HEADERS;
+    const defaultHeaders = {
+      'content-type': 'application/json; charset=utf-8',
+      accept: '*/*',
+    };
+
+    const result = processHeaders();
+    expect(result).toEqual(expect.objectContaining(defaultHeaders));
   });
 
-  it('should return merged and modified header', () => {
-    const optionHeader = {
+  test('It should merge default headers and new headers', () => {
+    const { processHeaders } = HEADERS;
+    const newHeaders = {
       'content-type': 'application/xml',
-      'x-custom-header': 'custom-value',
-    };
-
-    const customHeader = {
-      'content-type': 'text/plain',
-      'x-another-header': 'another-value',
-    };
-
-    const expectedMergedHeader = {
-      'content-type': 'text/plain',
+      'custom-header': 'custom-value',
       accept: '*/*',
-      'x-custom-header': 'custom-value',
-      'x-another-header': 'another-value',
     };
 
-    jest.spyOn(options, 'get').mockReturnValue(optionHeader);
+    const headers = new Headers(newHeaders);
+    const result = processHeaders(headers);
 
-    const processedHeader = PROCESS_HEADERS(customHeader);
-
-    expect(processedHeader).toEqual(expectedMergedHeader);
+    expect(result).toEqual(expect.objectContaining(newHeaders));
   });
 
-  it('should remove content-type if it starts with "multipart/form-data"', () => {
-    const customHeader = {
-      'content-type':
-        'multipart/form-data; boundary=----WebKitFormBoundaryABC123',
-      'x-custom-header': 'custom-value',
-    };
+  test('It should remove "content-type" header if starts with "multipart/form-data"', () => {
+    const { processHeaders } = HEADERS;
+    const headers: [string, string][] = [
+      [
+        'content-type',
+        'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+      ],
+    ];
 
-    const expectedModifiedHeader = {
-      accept: '*/*',
-      'x-custom-header': 'custom-value',
-    };
-
-    const processedHeader = PROCESS_HEADERS(customHeader);
-
-    expect(processedHeader).toEqual(expectedModifiedHeader);
-  });
-
-  it('should return default header if options is not provided', () => {
-    const expectedDefaultHeader = {
-      'content-type': 'application/json; charset=utf-8',
-      accept: '*/*',
-    };
-
-    const processedHeader = PROCESS_HEADERS();
-
-    expect(processedHeader).toEqual(expectedDefaultHeader);
-  });
-
-  it('should return default header if options is an empty object', () => {
-    const expectedDefaultHeader = {
-      'content-type': 'application/json; charset=utf-8',
-      accept: '*/*',
-    };
-
-    const processedHeader = PROCESS_HEADERS({});
-
-    expect(processedHeader).toEqual(expectedDefaultHeader);
+    const result = processHeaders(headers);
+    expect(result).not.toHaveProperty('content-type');
   });
 });

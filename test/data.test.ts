@@ -1,48 +1,29 @@
-import { PROCESS_DATA } from '../src/data';
+import { DATA } from '../src/data';
 
-describe('processData', () => {
-  it('should stringify data if it is JSON content', () => {
-    const options = {
-      data: { name: 'ei', age: 17 },
-      headers: { 'content-type': 'application/json' },
-    };
+describe('data', () => {
+  test('It should stringify JSON data when contentType is "application/json"', () => {
+    const { processData } = DATA;
+    const data = { key: 'value' };
+    const contentType = 'application/json; charset=utf-8';
+    const processedData = processData({ data, contentType });
 
-    const result = PROCESS_DATA(options);
-    const expected = JSON.stringify(options.data);
-
-    expect(result).toEqual(expected);
+    expect(processedData).toEqual(JSON.stringify(data));
   });
 
-  it('should return data as is if it is not JSON content', () => {
-    const options = {
-      data: 'Hello, World!',
-      headers: { 'content-type': 'text/plain' },
-    };
-
-    const result = PROCESS_DATA(options);
-
-    expect(result).toEqual(options.data);
+  test('It should not stringify non-JSON data', () => {
+    const { processData } = DATA;
+    const data = 'plain text data';
+    const contentType = 'text/plain';
+    const processedData = processData({ data, contentType });
+    expect(processedData).toEqual(data);
   });
 
-  it('should return data as is if content-type is not provided', () => {
-    const options = {
-      data: { name: 'ei', age: 17 },
-      headers: {},
-    };
+  test('It should not modify data when contentType is undefined', () => {
+    const { processData } = DATA;
+    const data = { key: 'value' };
+    const contentType = undefined;
+    const processedData = processData({ data, contentType });
 
-    const result = PROCESS_DATA(options);
-
-    expect(result).toEqual(options.data);
-  });
-
-  it('should return data as is if it is not an object', () => {
-    const options = {
-      data: 'Hello, World!',
-      headers: { 'content-type': 'application/json' },
-    };
-
-    const result = PROCESS_DATA(options);
-
-    expect(result).toEqual(options.data);
+    expect(processedData).toEqual(data);
   });
 });

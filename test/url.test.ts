@@ -1,62 +1,63 @@
-import * as globalOptions from '../src/options';
-import { PROCESS_URL } from '../src/url';
+import { CREATED_URL } from '../src/url';
 
-describe('processURL', () => {
-  beforeEach(() => {
-    globalOptions.set('baseUrl', 'https://example.com');
+const { processURL } = CREATED_URL;
+describe('url', () => {
+  test('It should process a simple URL without params', () => {
+    const url = 'https://example.com/api';
+    const result = processURL(url);
+
+    expect(result).toBe(url);
   });
 
-  it('should process URL without query parameters', () => {
-    const url = '/path/to/resource';
-    const result = PROCESS_URL(url);
-
-    expect(result).toBe('https://example.com/path/to/resource');
-  });
-
-  it('should process URL with query parameters', () => {
-    const url = '/path/to/resource';
-    const options = { param: { foo: 'bar', baz: 123 } };
-    const result = PROCESS_URL(url, options);
-
-    expect(result).toBe('https://example.com/path/to/resource?foo=bar&baz=123');
-  });
-
-  it('should encode query parameters if isEncode options is true', () => {
-    const url = '/path/to/resource';
-    const options = {
-      param: { foo: 'hello world', bar: 'test@example.com' },
-      isEncode: true,
+  test('It should process a URL with params', () => {
+    const url = 'https://example.com/api';
+    const param = {
+      param1: 'value1',
+      param2: 'value2',
     };
 
-    const result = PROCESS_URL(url, options);
+    const expectedURL = `${url}?param1=value1&param2=value2`;
+    const result = processURL(url, { param });
 
-    expect(result).toBe(
-      'https://example.com/path/to/resource?foo=hello%20world&bar=test%40example.com',
-    );
+    expect(result).toBe(expectedURL);
   });
 
-  it('should not encode query parameters if isEncode options is false', () => {
-    const url = '/path/to/resource';
-    const options = {
-      param: { foo: 'hello world', bar: 'test@example.com' },
-      isEncode: false,
+  test('It should process a URL with URL-encoded params', () => {
+    const url = 'https://example.com/api';
+    const param = {
+      param1: 'value with spaces',
+      param2: 42,
     };
 
-    const result = PROCESS_URL(url, options);
+    const expectedURL = `${url}?param1=value%20with%20spaces&param2=42`;
+    const result = processURL(url, { param });
 
-    expect(result).toBe(
-      'https://example.com/path/to/resource?foo=hello world&bar=test@example.com',
-    );
+    expect(result).toBe(expectedURL);
   });
 
-  it('should process URL with base URL and query parameters', () => {
-    const url = '/path/to/resource';
-    const options = { param: { foo: 'bar' } };
+  test('It should not encode params if isEncode is false', () => {
+    const url = 'https://example.com/api';
+    const params = {
+      param1: 'value with spaces',
+      param2: 42,
+    };
 
-    globalOptions.set('baseUrl', 'https://example.com/api');
+    const expectedURL = `${url}?param1=value with spaces&param2=42`;
+    const result = processURL(url, { param: params, isEncode: false });
 
-    const result = PROCESS_URL(url, options);
+    expect(result).toBe(expectedURL);
+  });
 
-    expect(result).toBe('https://example.com/api/path/to/resource?foo=bar');
+  test('It should handle URL with existing params', () => {
+    const url = 'https://example.com/api?existing=123';
+    const params = {
+      param1: 'value1',
+      param2: 'value2',
+    };
+
+    const expectedURL = `${url}&param1=value1&param2=value2`;
+    const result = processURL(url, { param: params });
+
+    expect(result).toBe(expectedURL);
   });
 });

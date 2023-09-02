@@ -1,34 +1,43 @@
-import * as options from '../src/options';
+import { OPTIONS_STORE } from '../src/optionsStore';
 
-describe('options', () => {
-  beforeEach(() => {
-    options.clear();
-  });
+const { clear, get, set } = OPTIONS_STORE;
 
+describe('Options Storage', () => {
   afterEach(() => {
-    options.clear();
+    clear();
+  });
+  test('It should set and get a value', () => {
+    set('headers', { 'Content-Type': 'application/json' });
+
+    const headers = get('headers');
+
+    expect(headers).toEqual({ 'Content-Type': 'application/json' });
   });
 
-  it('should set and get options value', () => {
-    const key = 'baseUrl';
-    const value = 'www.bear_ei_api.com';
+  test('It should return undefined for a key that was not set', () => {
+    const timeout = get('timeout');
 
-    options.set(key, value);
-
-    const retrievedValue = options.get(key);
-
-    expect(retrievedValue).toBe(value);
+    expect(timeout).toBeUndefined();
   });
 
-  it('should clear options values', () => {
-    const key = 'baseUrl';
-    const value = 'www.bear_ei_api.com';
+  test('It should clear all options', () => {
+    set('headers', { 'Content-Type': 'application/json' });
+    set('timeout', 5000);
 
-    options.set(key, value);
-    options.clear();
+    clear();
 
-    const retrievedValue = options.get(key);
+    const headers = get('headers');
+    const timeout = get('timeout');
 
-    expect(retrievedValue).toBeUndefined();
+    expect(headers).toBeUndefined();
+    expect(timeout).toBeUndefined();
+  });
+
+  test('It should handle setting and getting baseURL', () => {
+    set('baseURL', 'https://example.com/api');
+
+    const baseURL = get('baseURL');
+
+    expect(baseURL).toBe('https://example.com/api');
   });
 });
