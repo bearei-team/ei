@@ -5,10 +5,7 @@ import { HEADERS } from './headers';
 export type CreateProcessResponseOptions = Pick<FetchResponse, 'request'> &
   ProcessedFetchOptions;
 
-export type ProcessResponseDataOptions = Omit<
-  FetchResponse,
-  'data' | 'response'
->;
+export type ProcessResponseDataOptions = Omit<FetchResponse, 'data'>;
 
 export interface CreatedResponse {
   createProcessResponse: typeof createProcessResponse;
@@ -21,24 +18,22 @@ export enum Content {
 
 const { extractHeaders } = HEADERS;
 const { createResponseError } = ERROR;
-const createProcessResponseData =
-  (options: ProcessResponseDataOptions) =>
-  async (
-    type: keyof typeof Content,
-    response: Response,
-  ): Promise<FetchResponse> => {
-    const parseFunctionMap = {
-      [Content.JSON]: (response: Response): Promise<unknown> => response.json(),
-      [Content.TEXT]: (response: Response): Promise<string> => response.text(),
-    };
-
-    const data = await parseFunctionMap[Content[type]](response);
-    const processedResponse = { ...options, data, response };
-
-    return response.ok
-      ? processedResponse
-      : Promise.reject(createResponseError(processedResponse));
+const processResponseData = async (
+  type: keyof typeof Content,
+  { response, ...args }: ProcessResponseDataOptions,
+): Promise<FetchResponse> => {
+  const parseFunctionMap = {
+    [Content.JSON]: (response: Response): Promise<unknown> => response.json(),
+    [Content.TEXT]: (response: Response): Promise<string> => response.text(),
   };
+
+  const data = await parseFunctionMap[Content[type]](response);
+  const processedResponse = { ...args, data, response };
+
+  return response.ok
+    ? processedResponse
+    : Promise.reject(createResponseError(processedResponse));
+};
 
 const getContentType = (contentType?: string): keyof typeof Content => {
   const contentTypeMap: Record<string, keyof typeof Content> = {
@@ -61,7 +56,9 @@ const createProcessResponse =
     const headers = extractHeaders([...response.headers.entries()]);
     const contentType = headers['content-type'];
     const type = getContentType(contentType);
-    const processResponseData = createProcessResponseData({
+
+    return processResponseData(type, {
+      response,
       request,
       status,
       statusText,
@@ -69,8 +66,6 @@ const createProcessResponse =
       url,
       options: args,
     });
-
-    return processResponseData(type, response);
   };
 
 const createResponse = (): CreatedResponse => ({

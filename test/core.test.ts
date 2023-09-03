@@ -25,9 +25,9 @@ describe('core', () => {
   });
 
   test('It should be a failure in obtaining EI data', async () => {
-    fetchMock.mockResponseOnce('Not Found', {
-      status: 404,
-      statusText: 'Not Found',
+    fetchMock.mockResponseOnce('Precondition Failed', {
+      status: 412,
+      statusText: 'Precondition Failed',
     });
 
     const options: FetchOptions = {
@@ -38,8 +38,8 @@ describe('core', () => {
       (err: Err) => err,
     );
 
-    expect(fetchResult.data).toEqual('Not Found');
-    expect(fetchResult.status).toEqual(404);
+    expect(fetchResult.data).toEqual('Precondition Failed');
+    expect(fetchResult.status).toEqual(412);
   });
 
   test('It should be a timeout in obtaining EI data', async () => {

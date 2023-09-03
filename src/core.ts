@@ -69,6 +69,7 @@ export interface FetchResponse extends Pick<FetchOptions, 'headers'> {
   response: Response;
 }
 
+export type ProcessFetchOptions = FetchOptions;
 export interface ProcessedFetchOptions extends FetchOptions {
   /**
    * The complete URL address for the HTTP request or a request path, for example,
@@ -88,10 +89,10 @@ export interface EIFetch {
 }
 
 const optionsStore = OPTIONS_STORE;
-const { processHeaders } = HEADERS;
-const { processData } = DATA;
-const { createProcessResponse } = RESPONSE;
 const { processURL } = CREATED_URL;
+const { processData } = DATA;
+const { processHeaders } = HEADERS;
+const { createProcessResponse } = RESPONSE;
 const { createProcessError } = ERROR;
 const processFetchOptions = (
   url: string,
@@ -105,15 +106,11 @@ const processFetchOptions = (
     isEncode,
     baseURL,
     ...args
-  }: FetchOptions = {},
+  }: ProcessFetchOptions = {},
 ): ProcessedFetchOptions => {
   const fetchTimeout = timeout ?? optionsStore.get('timeout') ?? 3000;
+  const processedData = processData(data ?? body);
   const processedHeaders = processHeaders(headers);
-  const processedData = processData({
-    data: data ?? body,
-    contentType: processedHeaders['content-type'],
-  });
-
   const processedURL = processURL(baseURL ? `${baseURL}${url}` : url, {
     param,
     isEncode,
@@ -136,7 +133,7 @@ const performFetch = async ({
 }: PerformFetchOptions): Promise<FetchResponse> => {
   const abort = new AbortController();
   const signal = abort.signal;
-  const timer = setTimeout(() => abort.abort('Request Timeout'), timeout);
+  const timer = setTimeout(() => abort.abort(), timeout);
   const request = new Request(url, { signal, ...args });
   const responseOptions = { request, url, timeout, ...args };
   const processResponse = createProcessResponse(responseOptions);
