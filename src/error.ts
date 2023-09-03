@@ -62,11 +62,7 @@ const enrichError = (err: Err, options: EnrichErrorOptions): Err =>
 const createProcessError =
   ({ request, ...args }: CreateProcessErrorOptions) =>
   (error: Err): never => {
-    throw enrichError(error, {
-      request,
-      options: args,
-      url: args.url,
-    });
+    throw enrichError(error, { request, options: args, url: args.url });
   };
 
 const createError = (): CreatedError => ({
