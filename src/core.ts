@@ -15,12 +15,6 @@ export interface FetchOptions extends RequestInit {
   method?: 'GET' | 'HEAD' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 
   /**
-   * The complete URL address for the HTTP request or a request path, for example,
-   * "/api". When using the request path as the request URL, the "baseURL" parameter must be set.
-   */
-  url?: string;
-
-  /**
    * HTTP request timeout duration, measured in milliseconds. The default timeout is 3000 milliseconds.
    */
   timeout?: number;
@@ -75,6 +69,15 @@ export interface FetchResponse extends Pick<FetchOptions, 'headers'> {
   response: Response;
 }
 
+export interface ProcessedFetchOptions extends FetchOptions {
+  /**
+   * The complete URL address for the HTTP request or a request path, for example,
+   * "/api". When using the request path as the request URL, the "baseURL" parameter must be set.
+   */
+  url: string;
+}
+
+export type PerformFetchOptions = ProcessedFetchOptions;
 export interface EIFetch {
   (url: string, options?: FetchOptions): Promise<FetchResponse>;
 
@@ -93,7 +96,6 @@ const { createProcessError } = ERROR;
 const processFetchOptions = (
   url: string,
   {
-    url: fetchURL,
     method = 'GET',
     param,
     timeout,
@@ -101,17 +103,21 @@ const processFetchOptions = (
     data,
     body,
     isEncode,
+    baseURL,
     ...args
   }: FetchOptions = {},
-): FetchOptions => {
+): ProcessedFetchOptions => {
+  const fetchTimeout = timeout ?? optionsStore.get('timeout') ?? 3000;
   const processedHeaders = processHeaders(headers);
   const processedData = processData({
     data: data ?? body,
     contentType: processedHeaders['content-type'],
   });
 
-  const processedURL = processURL(url ?? fetchURL, { param, isEncode });
-  const fetchTimeout = timeout ?? optionsStore.get('timeout') ?? 3000;
+  const processedURL = processURL(baseURL ? `${baseURL}${url}` : url, {
+    param,
+    isEncode,
+  });
 
   return {
     method,
@@ -123,7 +129,9 @@ const processFetchOptions = (
   };
 };
 
-const performFetch = async (options: FetchOptions): Promise<FetchResponse> => {
+const performFetch = async (
+  options: PerformFetchOptions,
+): Promise<FetchResponse> => {
   const abort = new AbortController();
   const signal = abort.signal;
   const timer = setTimeout(
@@ -131,7 +139,7 @@ const performFetch = async (options: FetchOptions): Promise<FetchResponse> => {
     options.timeout,
   );
 
-  const request = new Request(options.url!, { signal, ...options });
+  const request = new Request(options.url, { signal, ...options });
   const responseOptions = { request, ...options };
   const processResponse = createProcessResponse(responseOptions);
   const processError = createProcessError(responseOptions);
