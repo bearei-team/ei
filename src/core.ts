@@ -78,7 +78,6 @@ export interface ProcessedFetchOptions extends FetchOptions {
 }
 
 export type PerformFetchOptions = ProcessedFetchOptions;
-
 export interface EIFetch {
   (url: string, options?: FetchOptions): Promise<FetchResponse>;
 

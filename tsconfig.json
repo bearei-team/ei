@@ -25,5 +25,5 @@
       "module": "commonjs"
     }
   },
-  "include": ["src", "test/setupJest.ts"]
+  "include": ["src"]
 }
