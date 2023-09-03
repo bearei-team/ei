@@ -2,18 +2,18 @@ import { Err, ERROR } from '../src/error';
 
 const { createProcessError, createResponseError } = ERROR;
 
-describe('err', () => {
+describe('error', () => {
   it('It should throw an enhanced TimeoutError for AbortError', () => {
-    const request = new Request('https://example.com', {
-      method: 'GET',
-    });
-
+    const request = new Request('https://example.com', { method: 'GET' });
     const errorOptions: Err = {
       name: 'AbortError',
       request,
     };
 
-    const createProcessErrorFn = createProcessError({} as any);
+    const createProcessErrorFn = createProcessError({
+      request,
+      url: 'https://example.com',
+    });
 
     expect(() => createProcessErrorFn(errorOptions)).toThrowError(
       'TimeoutError',
@@ -35,17 +35,17 @@ describe('err', () => {
   });
 
   it('It should create an HTTPError with status code and status text', () => {
-    const request = new Request('https://example.com', {
-      method: 'GET',
-    });
-
+    const request = new Request('https://example.com', { method: 'GET' });
     const errorOptions: Err = {
       status: 404,
       statusText: 'Not Found',
       request,
     };
 
-    const createProcessErrorFn = createProcessError({} as any);
+    const createProcessErrorFn = createProcessError({
+      request,
+      url: 'https://example.com',
+    });
 
     expect(() => createProcessErrorFn(errorOptions)).toThrowError(
       'Request failed with status code 404 Not Found',
@@ -67,9 +67,7 @@ describe('err', () => {
   });
 
   it('It should create a ResponseError with status code and status text', () => {
-    const request = new Request('https://example.com', {
-      method: 'GET',
-    });
+    const request = new Request('https://example.com', { method: 'GET' });
 
     const errorOptions: Err = {
       status: 404,

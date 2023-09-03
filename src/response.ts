@@ -6,7 +6,6 @@ export type CreateProcessResponseOptions = Pick<FetchResponse, 'request'> &
   ProcessedFetchOptions;
 
 export type ProcessResponseDataOptions = Omit<FetchResponse, 'data'>;
-
 export interface CreatedResponse {
   createProcessResponse: typeof createProcessResponse;
 }

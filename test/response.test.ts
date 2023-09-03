@@ -13,6 +13,7 @@ describe('response', () => {
         'Content-Type': 'application/json',
       },
     });
+
     const createResponse = createProcessResponse({ request, url });
     const result = await createResponse(response);
 
