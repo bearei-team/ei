@@ -35,14 +35,11 @@ const removeContentType = <T extends Record<string, string>>(headers: T): T => {
   return headers;
 };
 
-const extractHeaders = (
-  headers: [string, string][],
-): Record<string, string> => {
-  return [...headers].reduce(
+const extractHeaders = (headers: [string, string][]): Record<string, string> =>
+  [...headers].reduce(
     (accumulator, [key, value]) => ({ ...accumulator, [key]: value }),
     {},
   );
-};
 
 const processHeaders = (headers: HeadersInit = {}): Record<string, string> => {
   const defaultHeaders: Record<string, string> = {

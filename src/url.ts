@@ -1,7 +1,10 @@
 import type { FetchOptions, SearchType } from '@/core';
 import { OPTIONS_STORE } from './optionsStore';
 
-export type URLOptions = Partial<Pick<FetchOptions, 'param' | 'isEncode'>>;
+export type ProcessURLOptions = Partial<
+  Pick<FetchOptions, 'param' | 'isEncode'>
+>;
+
 export interface CreatedURL {
   processURL: typeof processURL;
 }
@@ -25,7 +28,7 @@ const getSearchParam = (
 
 const processSearchString = (
   searchParam: Record<string, SearchType | null>,
-  { isEncode = true }: Pick<URLOptions, 'isEncode'>,
+  { isEncode = true }: Pick<ProcessURLOptions, 'isEncode'>,
 ) =>
   Object.entries(searchParam).reduce((accumulator, [key, value]) => {
     if (value || typeof value === 'number') {
@@ -41,7 +44,7 @@ const processSearchString = (
 
 const processURL = (
   url: string,
-  { param = {}, isEncode }: URLOptions = {},
+  { param = {}, isEncode }: ProcessURLOptions = {},
 ): string => {
   const { searchParams, origin, pathname } = processFullURL(url);
   const newURL = `${origin}${pathname !== '/' ? pathname : ''}`;

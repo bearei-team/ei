@@ -11,7 +11,7 @@ export type Err = Partial<Error> & CreateErrOptions;
 export type CreateProcessErrorOptions = CreateProcessResponseOptions;
 export type EnrichErrorOptions = Omit<
   ProcessResponseDataOptions,
-  'status' | 'statusText'
+  'status' | 'statusText' | 'response'
 >;
 
 export interface CreatedError {
@@ -19,7 +19,7 @@ export interface CreatedError {
   createResponseError: typeof createResponseError;
 }
 
-const createErr = (err: Err): Err => Object.assign(new Error(), err);
+const createErr = (error: Err): Err => Object.assign(new Error(), error);
 const createHTTPError = ({
   status,
   statusText = '',
@@ -48,16 +48,16 @@ const createResponseError = (options: CreateErrOptions): Err =>
     message: 'Request response failed',
   });
 
-const enrichError = (err: Err, options: EnrichErrorOptions): Err =>
-  err.name === 'AbortError'
+const enrichError = (error: Err, options: EnrichErrorOptions): Err =>
+  error.name === 'AbortError'
     ? createTimeoutError({
-        ...err,
+        ...error,
         ...options,
         status: 408,
         statusText: 'Request Timeout',
         data: 'Request Timeout',
       })
-    : createHTTPError(err);
+    : createHTTPError(error);
 
 const createProcessError =
   ({ request, ...args }: CreateProcessErrorOptions) =>
