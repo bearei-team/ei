@@ -129,18 +129,16 @@ const processFetchOptions = (
   };
 };
 
-const performFetch = async (
-  options: PerformFetchOptions,
-): Promise<FetchResponse> => {
+const performFetch = async ({
+  url,
+  timeout,
+  ...args
+}: PerformFetchOptions): Promise<FetchResponse> => {
   const abort = new AbortController();
   const signal = abort.signal;
-  const timer = setTimeout(
-    () => abort.abort('Request Timeout'),
-    options.timeout,
-  );
-
-  const request = new Request(options.url, { signal, ...options });
-  const responseOptions = { request, ...options };
+  const timer = setTimeout(() => abort.abort('Request Timeout'), timeout);
+  const request = new Request(url, { signal, ...args });
+  const responseOptions = { request, url, timeout, ...args };
   const processResponse = createProcessResponse(responseOptions);
   const processError = createProcessError(responseOptions);
   const processFinally = (): void => {

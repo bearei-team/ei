@@ -50,13 +50,13 @@ const processHeaders = (headers: HeadersInit = {}): Record<string, string> => {
     accept: '*/*',
   };
 
-  const globalHeaders = optionsStore.get('headers');
-  const createdGlobalHeaders = createHeadersObject(globalHeaders);
+  const storeHeaders = optionsStore.get('headers');
+  const createdStoreHeaders = createHeadersObject(storeHeaders);
   const createdHeaders = createHeadersObject(headers);
 
   return removeContentType(
     mergeHeaders(
-      mergeHeaders(defaultHeaders, createdGlobalHeaders),
+      mergeHeaders(defaultHeaders, createdStoreHeaders),
       createdHeaders,
     ),
   );

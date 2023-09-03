@@ -21,23 +21,17 @@ export enum Content {
 
 const { extractHeaders } = HEADERS;
 const { createResponseError } = ERROR;
-const parseFunctionMap = {
-  [Content.JSON]: (response: Response): Promise<unknown> => response.json(),
-  [Content.TEXT]: (response: Response): Promise<string> => response.text(),
-};
-
-const contentTypeMap: Record<string, keyof typeof Content> = {
-  'application/json': 'JSON',
-  'text/html': 'TEXT',
-  'text/plain': 'TEXT',
-};
-
 const createProcessResponseData =
   (options: ProcessResponseDataOptions) =>
   async (
     type: keyof typeof Content,
     response: Response,
   ): Promise<FetchResponse> => {
+    const parseFunctionMap = {
+      [Content.JSON]: (response: Response): Promise<unknown> => response.json(),
+      [Content.TEXT]: (response: Response): Promise<string> => response.text(),
+    };
+
     const data = await parseFunctionMap[Content[type]](response);
     const processedResponse = { ...options, data, response };
 
@@ -47,11 +41,17 @@ const createProcessResponseData =
   };
 
 const getContentType = (contentType?: string): keyof typeof Content => {
-  const contentTypeKey = Object.keys(contentTypeMap).find(key =>
-    contentType?.startsWith(key),
-  );
+  const contentTypeMap: Record<string, keyof typeof Content> = {
+    'application/json': 'JSON',
+    'text/html': 'TEXT',
+    'text/plain': 'TEXT',
+  };
 
-  return contentTypeKey ? contentTypeMap[contentTypeKey] : 'TEXT';
+  const content = Object.entries(contentTypeMap).find(([key]) =>
+    contentType?.startsWith(key),
+  )?.[1];
+
+  return content ?? 'TEXT';
 };
 
 const createProcessResponse =
