@@ -69,6 +69,7 @@ export interface FetchResponse extends Pick<FetchOptions, 'headers'> {
   response: Response;
 }
 
+export type ProcessFetchOptions = FetchOptions;
 export interface ProcessedFetchOptions extends FetchOptions {
   /**
    * The complete URL address for the HTTP request or a request path, for example,
@@ -105,7 +106,7 @@ const processFetchOptions = (
     isEncode,
     baseURL,
     ...args
-  }: FetchOptions = {},
+  }: ProcessFetchOptions = {},
 ): ProcessedFetchOptions => {
   const fetchTimeout = timeout ?? optionsStore.get('timeout') ?? 3000;
   const processedHeaders = processHeaders(headers);
