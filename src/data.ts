@@ -1,11 +1,4 @@
-import type { DataInit, FetchOptions } from '@/core';
-
-export interface ProcessDataOptions extends Pick<FetchOptions, 'data'> {
-  /**
-   * The content type of the request, for example, "application/json; charset=utf-8".
-   */
-  contentType?: string;
-}
+import type { DataInit } from '@/core';
 
 export interface Data {
   processData: typeof processData;

@@ -89,10 +89,10 @@ export interface EIFetch {
 }
 
 const optionsStore = OPTIONS_STORE;
-const { processHeaders } = HEADERS;
-const { processData } = DATA;
-const { createProcessResponse } = RESPONSE;
 const { processURL } = CREATED_URL;
+const { processData } = DATA;
+const { processHeaders } = HEADERS;
+const { createProcessResponse } = RESPONSE;
 const { createProcessError } = ERROR;
 const processFetchOptions = (
   url: string,

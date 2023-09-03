@@ -4,6 +4,7 @@ import { OPTIONS_STORE } from './optionsStore';
 export type ProcessURLOptions = Partial<
   Pick<FetchOptions, 'param' | 'isEncode'>
 >;
+
 export interface CreatedURL {
   processURL: typeof processURL;
 }

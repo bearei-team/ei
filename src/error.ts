@@ -11,7 +11,7 @@ export type Err = Partial<Error> & CreateErrOptions;
 export type CreateProcessErrorOptions = CreateProcessResponseOptions;
 export type EnrichErrorOptions = Omit<
   ProcessResponseDataOptions,
-  'status' | 'statusText'
+  'status' | 'statusText' | 'response'
 >;
 
 export interface CreatedError {
