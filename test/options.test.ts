@@ -2,10 +2,11 @@ import { OPTIONS_STORE } from '../src/optionsStore';
 
 const { clear, get, set } = OPTIONS_STORE;
 
-describe('Options Storage', () => {
+describe('options', () => {
   afterEach(() => {
     clear();
   });
+
   test('It should set and get a value', () => {
     set('headers', { 'Content-Type': 'application/json' });
 
