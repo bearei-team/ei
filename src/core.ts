@@ -109,12 +109,8 @@ const processFetchOptions = (
   }: ProcessFetchOptions = {},
 ): ProcessedFetchOptions => {
   const fetchTimeout = timeout ?? optionsStore.get('timeout') ?? 3000;
+  const processedData = processData(data ?? body);
   const processedHeaders = processHeaders(headers);
-  const processedData = processData({
-    data: data ?? body,
-    contentType: processedHeaders['content-type'],
-  });
-
   const processedURL = processURL(baseURL ? `${baseURL}${url}` : url, {
     param,
     isEncode,
@@ -137,7 +133,7 @@ const performFetch = async ({
 }: PerformFetchOptions): Promise<FetchResponse> => {
   const abort = new AbortController();
   const signal = abort.signal;
-  const timer = setTimeout(() => abort.abort('Request Timeout'), timeout);
+  const timer = setTimeout(() => abort.abort(), timeout);
   const request = new Request(url, { signal, ...args });
   const responseOptions = { request, url, timeout, ...args };
   const processResponse = createProcessResponse(responseOptions);
